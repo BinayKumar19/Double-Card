@@ -26,12 +26,18 @@ class Board:
       print('part2_col:'+str(part2_col))
       print('part2_row:'+str(part2_row))
       
-      if(card_angle in ('1','4','5','8')):
+      if(card_angle in ('1','4')):
         card_part1 = card[1]
         card_part2 = card[2] 
-      elif(card_angle in ('2','3','6','7')):
+      elif(card_angle in ('2','3')):
         card_part1 = card[2]
         card_part2 = card[1]        
+      elif(card_angle in ('5','8')):
+        card_part1 = card[3]
+        card_part2 = card[4]   
+      elif(card_angle in ('6','7')):
+        card_part1 = card[4]
+        card_part2 = card[3]        
         
       if(card_angle in ('1','3','5','7')):
         part2_col = part2_col + 1

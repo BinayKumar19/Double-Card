@@ -30,7 +30,6 @@ class cardBackPart2:
     square_color = 'W'
     circle_color = 'B'
 
-
 class Player:
     cards = []
 

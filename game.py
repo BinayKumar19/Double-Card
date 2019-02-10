@@ -29,9 +29,10 @@ class Game:
             self.current_turn = 0
     
     def play_regular_move(self, card_angle, row , column):
-        print('Game-'+'regular move')
+        
         card = self.players[self.current_turn].get_card()
         result = self.board.regular_move(card, card_angle, row, column) 
+        
         if (result):
             return result
         else:
@@ -87,17 +88,18 @@ class Game:
     
     def is_winner_decided(self):
        status = False 
+       
        dot_count,color_count = self._winner_check_horizontal()
        if (color_count == 4):
-           status = self._find_winner(PreferenceType.C)
+           status = self._set_winner(PreferenceType.C,dot_count)
        elif (dot_count == 4):
-           status = self._find_winner(PreferenceType.D)
+           status = self._set_winner(PreferenceType.D, color_count)
                   
        dot_count,color_count = self._winner_check_vertical()
        if (color_count == 4):
-           status = self._set_winner(PreferenceType.C)
+           status = self._set_winner(PreferenceType.C,dot_count)
        elif (dot_count == 4):
-           status = self._set_winner(PreferenceType.D)
+           status = self._set_winner(PreferenceType.D, color_count)
        
        if (status):
          print('Winner is '+self.winner)     
