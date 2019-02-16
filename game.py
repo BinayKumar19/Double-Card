@@ -89,24 +89,19 @@ class Game:
            self.stage = GameStage.end       
            return status             
        
-       color_set, dot_set = self._winner_check_horizontal()
-       print('Horizontal color_set:'+str(color_set))
-       print('Horizontal dot_set:'+str(dot_set))
+       color_set_horizontal, dot_set_horizontal = self._winner_check_horizontal()
+       print('Horizontal color_set:'+str(color_set_horizontal))
+       print('Horizontal dot_set:'+str(dot_set_horizontal))
           
-       status = self._set_winner(color_set, dot_set)
-       if status:
-           return status
-#                  
-       color_set, dot_set = self._winner_check_vertical()
-       status = self._set_winner(color_set, dot_set)
-#
-       if status:
-          return status
+                   
+       color_set_vertical, dot_set_vertical = self._winner_check_vertical()
       
-       color_set,dot_set = self._winner_check_diagonal()
+       color_set_diagonal,dot_set_diagonal = self._winner_check_diagonal()
     
-       status = self._set_winner(color_set, dot_set)
-            
+       color_set = color_set_horizontal or color_set_vertical or color_set_diagonal
+       dot_set = dot_set_horizontal or dot_set_vertical or dot_set_diagonal
+       
+       status = self._set_winner(color_set, dot_set)     
        return status  
    
     def get_stage(self):
