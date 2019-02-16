@@ -64,17 +64,18 @@ class Game:
           for j in range(0,8):           
               card = str(self.board.matrix[i,j])
               if(card != '0'):
+                 print('card:'+str(card)) 
                  if (card[0] == previous_color_type):
                      color_count = color_count + 1
                  else:
                      previous_color_type = card[0] 
-                     color_count = 0
+                     color_count = 1
                  
-                 if (card[1] == previous_dot_type):
+                 if (card[2] == previous_dot_type):
                      dot_count = dot_count + 1
                  else:
-                     previous_dot_type = card[1]
-                     dot_count = 0
+                     previous_dot_type = card[2]
+                     dot_count = 1
                  
                  if (color_count == 4 or dot_count == 4):
                      return dot_count,color_count
@@ -86,15 +87,30 @@ class Game:
                  color_count = 0
         return dot_count,color_count
     
-    def _set_winner(self, preference_type , other_preference_type_count):
-           if (self.players[self.current_turn].player_type == preference_type):
+    def _set_winner(self, color_count , dot_count):
+         
+        print('current player:'+str(self.players[self.current_turn].player_name))
+        print('other player:'+str(self.players[1 - self.current_turn].player_name))
+        print('dot count:'+str(dot_count))
+        print('color count:'+str(color_count))
+        print('current player choice:'+str(self.players[self.current_turn].preference_type))
+
+        if (color_count ==4 and
+            self.players[self.current_turn].preference_type == PreferenceType.C): 
               self.winner = self.players[self.current_turn].player_name 
-           elif(other_preference_type_count == 4):
-              self.winner = self.players[1 - self.current_turn].player_name 
-           else:
-              return False
-           self.stage = GameStage.end       
-           return True
+        elif(dot_count == 4 and
+             self.players[self.current_turn].preference_type == PreferenceType.D):
+              self.winner = self.players[self.current_turn].player_name 
+        elif(color_count == 4 and
+            self.players[self.current_turn].preference_type == PreferenceType.D):
+              self.winner = self.players[1 - self.current_turn].player_name          
+        elif(dot_count == 4 and
+            self.players[self.current_turn].preference_type == PreferenceType.C):
+              self.winner = self.players[1 - self.current_turn].player_name    
+        else:
+             return False
+        self.stage = GameStage.end       
+        return True
     
     def is_winner_decided(self):
        status = False 
@@ -108,28 +124,18 @@ class Game:
        print(dot_count)
        print(color_count)
        
-       if (color_count == 4 or dot_count == 4):
-           status = self._set_winner(PreferenceType.C, dot_count)
-       elif (dot_count == 4):
-           status = self._set_winner(PreferenceType.D, color_count)
-          
+       status = self._set_winner(color_count, dot_count)
        if status:
            return status
                   
        dot_count,color_count = self._winner_check_vertical()
-       if (color_count == 4):
-           status = self._set_winner(PreferenceType.C, dot_count)
-       elif (dot_count == 4):
-           status = self._set_winner(PreferenceType.D, color_count)
+       status = self._set_winner(color_count, dot_count)
 
        if status:
            return status
       
        dot_count,color_count = self._winner_check_diagonal()
-       if (color_count == 4):
-           status = self._set_winner(PreferenceType.C, dot_count)
-       elif (dot_count == 4):
-           status = self._set_winner(PreferenceType.D, color_count)
+       status = self._set_winner(color_count, dot_count)
             
        return status  
    

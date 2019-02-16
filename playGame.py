@@ -5,7 +5,7 @@ Created on Sat Feb  9 14:01:33 2019
 @author: binay
 """
 from player import PlayerType as pt
-from player import Player 
+from player import Player,PreferenceType 
 from game import Game, GameStage
 
 def play_game(new_game):
@@ -30,6 +30,8 @@ def play_game(new_game):
            new_game.play_recycle_move(card_angle, row , column)     
         
          status = new_game.get_stage()
+         new_game.disply_board()
+        
          if (status == GameStage.end):
              break
          elif (status == GameStage.REC):
@@ -38,7 +40,6 @@ def play_game(new_game):
             print('else')
            
          new_game.change_turn()
-         new_game.disply_board()
          
         if (status == GameStage.end):
              break
@@ -50,14 +51,22 @@ def initialize_game():
   game_mode = input('Enter 1 - Manual Mode 2 - Automatic Mode')
 
   player1_type = pt.H
-  player1_choice = int(input('Enter Player1''s Preference choice:\n1 - dots or 2 - colors?\n'))
+  player1_choice = input('Enter Player1''s Preference choice:\n1 - dots or 2 - colors?\n')
 
-  if(game_mode==1):
+  if(player1_choice == '1'):
+     player1_choice = PreferenceType.D
+     player2_choice = PreferenceType.C
+  elif (player1_choice == '2'):
+     player1_choice = PreferenceType.C
+     player2_choice = PreferenceType.D
+  else:   
+     return 'N'   
+   
+
+  if(game_mode=='1'):
     player2_type = pt.H
   else:
     player2_type = pt.AI
-
-  player2_choice = 3 - player1_choice
 
   player1 = Player('Player 1', player1_type, player1_choice)
   player2 = Player('Player 2', player2_type, player2_choice)
@@ -68,4 +77,7 @@ def initialize_game():
   return new_game
 
 new_game = initialize_game()
-play_game(new_game)
+if (new_game != 'N'):
+  play_game(new_game)
+else:
+  print('Invalid Input')  
