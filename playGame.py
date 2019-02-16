@@ -6,27 +6,39 @@ Created on Sat Feb  9 14:01:33 2019
 """
 from player import PlayerType as pt
 from player import Player 
-from game import Game
+from game import Game, GameStage
 
 def play_game(new_game):
-    while not new_game.is_winner_decided():
-        #card_side = input('Enter side of the card')
-        #card_angle = input('Enter Degree of Rotation of the card')
-        #card_position = input('Enter Dposition of the card')
+    while True :
         input_line = input()
-        input_move = input_line.split(" ")
-        card_move = input_move[0]
-        card_angle = input_move[1]
-        row = input_move[3]
-        column = input_move[2]
+        lines = input_line.split('\n')
+        for move_index in range(0,len(lines)):
+         input_move = lines[move_index].split(" ")
+         card_move = input_move[0]
+         card_angle = input_move[1]
+         row = input_move[3]
+         column = input_move[2]
+#         print('card_move:'+card_move)
+#         print('card_angle:'+card_angle)
+#         print('row:'+row)
+#         print('column:'+column)
+#         print('before calling move func')
+         print('\nmove: '+lines[move_index])         
+         if (card_move=='0'):
+           new_game.play_regular_move(card_angle, row , column)
+         else:
+           new_game.play_recycle_move(card_angle, row , column)     
         
-        if (card_move=='0'):
-          new_game.play_regular_move(card_angle, row , column)
-        else:
-          new_game.play_recycle_move(card_angle, row , column)     
-        
-        new_game.change_turn()
-        new_game.disply_board()
+         status = new_game.get_stage()
+         if (status == GameStage.end):
+             break
+         elif (status == GameStage.REC):
+            print('No cards left, time to play the Regular moves')
+           
+         new_game.change_turn()
+         new_game.disply_board()
+
+    new_game.print_result()
     
 def initialize_game():
   print('Lets Play the Game')
