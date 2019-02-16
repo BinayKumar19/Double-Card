@@ -34,10 +34,15 @@ def play_game(new_game):
              break
          elif (status == GameStage.REC):
             print('No cards left, time to play the Regular moves')
+         else:
+            print('else')
            
          new_game.change_turn()
          new_game.disply_board()
-
+         
+        if (status == GameStage.end):
+             break
+            
     new_game.print_result()
     
 def initialize_game():

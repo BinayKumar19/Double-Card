@@ -40,6 +40,7 @@ class Game:
         card = self.players[self.current_turn].get_card()
         result = self.board.regular_move(card, card_angle, row, column) 
         
+        self.is_winner_decided();
         if (result):
             if (len(self.board.card_list)==24):
                self.stage = GameStage.REC
@@ -89,7 +90,7 @@ class Game:
            if (self.players[self.current_turn].player_type == preference_type):
               self.winner = self.players[self.current_turn].player_name 
            elif(other_preference_type_count == 4):
-              self.winner = self.players[3 - self.current_turn].player_name 
+              self.winner = self.players[1 - self.current_turn].player_name 
            else:
               return False
            self.stage = GameStage.end       
@@ -104,18 +105,31 @@ class Game:
            return status             
        
        dot_count,color_count = self._winner_check_horizontal()
-       if (color_count == 4):
+       print(dot_count)
+       print(color_count)
+       
+       if (color_count == 4 or dot_count == 4):
            status = self._set_winner(PreferenceType.C, dot_count)
        elif (dot_count == 4):
            status = self._set_winner(PreferenceType.D, color_count)
+          
+       if status:
+           return status
                   
        dot_count,color_count = self._winner_check_vertical()
        if (color_count == 4):
            status = self._set_winner(PreferenceType.C, dot_count)
        elif (dot_count == 4):
            status = self._set_winner(PreferenceType.D, color_count)
+
+       if status:
+           return status
       
        dot_count,color_count = self._winner_check_diagonal()
+       if (color_count == 4):
+           status = self._set_winner(PreferenceType.C, dot_count)
+       elif (dot_count == 4):
+           status = self._set_winner(PreferenceType.D, color_count)
             
        return status  
    
@@ -123,6 +137,7 @@ class Game:
         return self.stage
             
     def print_result(self):
+        print('print result called:self.winner:'+str(self.winner))
         if (self.winner =='N'):
             print('Draw')
         else:
