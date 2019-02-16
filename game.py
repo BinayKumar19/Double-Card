@@ -39,9 +39,10 @@ class Game:
         
         card = self.players[self.current_turn].get_card()
         result = self.board.regular_move(card, card_angle, row, column) 
+        print('card placement for card'+ str(len(self.board.card_list))+' :'+str(result))
         
-        self.is_winner_decided();
         if (result):
+            self.is_winner_decided();
             if (len(self.board.card_list)==24):
                self.stage = GameStage.REC
             return result
@@ -54,57 +55,25 @@ class Game:
           
     def print_board(self):
       print(self.matrix)         
-   
-    def _winner_check_horizontal(self):
-        for i in range(0,12):
-          dot_count = 0
-          previous_dot_type = 'N'
-          previous_color_type = 'N'        
-          color_count = 0     
-          for j in range(0,8):           
-              card = str(self.board.matrix[i,j])
-              if(card != '0'):
-                 print('card:'+str(card)) 
-                 if (card[0] == previous_color_type):
-                     color_count = color_count + 1
-                 else:
-                     previous_color_type = card[0] 
-                     color_count = 1
-                 
-                 if (card[2] == previous_dot_type):
-                     dot_count = dot_count + 1
-                 else:
-                     previous_dot_type = card[2]
-                     dot_count = 1
-                 
-                 if (color_count == 4 or dot_count == 4):
-                     return dot_count,color_count
-        
-              else:
-                 dot_count = 0
-                 previous_dot_type = 'N'
-                 previous_color_type = 'N'        
-                 color_count = 0
-        return dot_count,color_count
-    
-    def _set_winner(self, color_count , dot_count):
+       
+    def _set_winner(self, color_set , dot_set):
          
-        print('current player:'+str(self.players[self.current_turn].player_name))
-        print('other player:'+str(self.players[1 - self.current_turn].player_name))
-        print('dot count:'+str(dot_count))
-        print('color count:'+str(color_count))
-        print('current player choice:'+str(self.players[self.current_turn].preference_type))
+#        print('current player:'+str(self.players[self.current_turn].player_name))
+#        print('other player:'+str(self.players[1 - self.current_turn].player_name))
+#        print('dot count:'+str(dot_count))
+#        print('color count:'+str(color_count))
+#        print('current player choice:'+str(self.players[self.current_turn].preference_type))
 
-        if (color_count ==4 and
+        if (color_set and
             self.players[self.current_turn].preference_type == PreferenceType.C): 
               self.winner = self.players[self.current_turn].player_name 
-        elif(dot_count == 4 and
+        elif(dot_set and
              self.players[self.current_turn].preference_type == PreferenceType.D):
               self.winner = self.players[self.current_turn].player_name 
-        elif(color_count == 4 and
+        elif(color_set and
             self.players[self.current_turn].preference_type == PreferenceType.D):
               self.winner = self.players[1 - self.current_turn].player_name          
-        elif(dot_count == 4 and
+        elif(dot_set and
             self.players[self.current_turn].preference_type == PreferenceType.C):
               self.winner = self.players[1 - self.current_turn].player_name    
         else:
@@ -120,22 +89,23 @@ class Game:
            self.stage = GameStage.end       
            return status             
        
-       dot_count,color_count = self._winner_check_horizontal()
-       print(dot_count)
-       print(color_count)
-       
-       status = self._set_winner(color_count, dot_count)
+       color_set, dot_set = self._winner_check_horizontal()
+##       print(dot_count)
+##       print(color_count)
+##       
+       status = self._set_winner(color_set, dot_set)
        if status:
            return status
-                  
-       dot_count,color_count = self._winner_check_vertical()
-       status = self._set_winner(color_count, dot_count)
-
+#                  
+       color_set, dot_set = self._winner_check_vertical()
+       status = self._set_winner(color_set, dot_set)
+#
        if status:
-           return status
+          return status
       
-       dot_count,color_count = self._winner_check_diagonal()
-       status = self._set_winner(color_count, dot_count)
+       color_set,dot_set = self._winner_check_diagonal()
+    
+       status = self._set_winner(color_set, dot_set)
             
        return status  
    
@@ -151,108 +121,219 @@ class Game:
         
 
     def _winner_check_vertical(self):
-        for i in range(0,8):
-          dot_count = 0
-          previous_dot_type = 'N'
-          previous_color_type = 'N'        
-          color_count = 0
+        last_pos = len(self.board.move_list)
+        position = self.board.move_list[last_pos].split(':')
+        print('position:'+str(position)) 
+        row =  [int(position[0]),int(position[2])] 
+        col =  [int(position[1]),int(position[3])]
+        color_set = False
+        dot_set = False
             
-          for j in range(0,12):           
-              card = str(self.board.matrix[j,i])
-              if(card != '0'):
-                 if (card[0] == previous_color_type):
-                     color_count = color_count + 1
-                 else:
-                     previous_color_type = card[0]
-                     color_count = 0
+        for i in range(0,2):
+          previous_dot_type_fwd = 'N'
+          previous_color_type_fwd = 'N'        
+          color_count_fwd = 0     
+          dot_count_fwd = 0
+          previous_dot_type_bck = 'N'
+          previous_color_type_bck = 'N'        
+          color_count_bck = 0     
+          dot_count_bck = 0
+          
+          row_tmp = row[i] 
+          Col_tmp = col[i] 
+          dot_set_tmp = False
+          color_set_tmp = False
+          for j in range(0,4): 
+             if (self.board.boundar_check(row_tmp+j,Col_tmp)): 
+                 card_fwd = str(self.board.matrix[row_tmp+j,Col_tmp])
+                 if(card_fwd != '0'):
+                   if (card_fwd[0] == previous_color_type_fwd):
+                     color_count_fwd = color_count_fwd + 1
+                   else:
+                     previous_color_type_fwd = card_fwd[0] 
+                     color_count_fwd = 1
                  
-                 if (card[1] == previous_dot_type):
-                     dot_count = dot_count + 1
-                 else:
-                     previous_dot_type = card[1]
-                     dot_count = 0
-                 
-                 if (color_count == 4 or dot_count == 4):
-                     return dot_count,color_count
+                   if (card_fwd[2] == previous_dot_type_fwd):
+                     dot_count_fwd = dot_count_fwd + 1
+                   else:
+                     previous_dot_type_fwd = card_fwd[2]
+                     dot_count_fwd = 1
+     
+             if (self.board.boundar_check(row_tmp-j,Col_tmp)): 
+                 card_bck = str(self.board.matrix[row_tmp-j,Col_tmp])
+                 if(card_bck != '0'):
+                   if (card_bck[0] == previous_color_type_bck):
+                     color_count_bck = color_count_bck + 1
+                   else:
+                     previous_color_type_bck = card_bck[0] 
+                     color_count_bck = 1
+             
+                   if (card_bck[2] == previous_dot_type_bck):
+                     dot_count_bck = dot_count_bck + 1
+                   else:
+                     previous_dot_type_bck = card_bck[2]
+                     dot_count_bck = 1
+             
+          if (dot_count_fwd==4 or
+              dot_count_bck == 4):
+                dot_set_tmp = True 
+          if(color_count_bck ==4 or
+             color_count_bck == 4):
+                color_set_tmp = True 
+          
+          color_set = color_set or color_set_tmp
+          dot_set = dot_set or dot_set_tmp                
+            
+        return color_set,dot_set
+
+    def _winner_check_horizontal(self):
         
-              else:
-                 dot_count = 0
-                 previous_dot_type = 'N'
-                 previous_color_type = 'N'        
-                 color_count = 0
-        return dot_count,color_count
+        last_pos = len(self.board.move_list)
+        position = self.board.move_list[last_pos].split(':')
+        print('position:'+str(position)) 
+        row =  [int(position[0]),int(position[2])] 
+        col =  [int(position[1]),int(position[3])]
+        color_set = False
+        dot_set = False
+            
+        for i in range(0,2):
+          previous_dot_type_fwd = 'N'
+          previous_color_type_fwd = 'N'        
+          color_count_fwd = 0     
+          dot_count_fwd = 0
+          previous_dot_type_bck = 'N'
+          previous_color_type_bck = 'N'        
+          color_count_bck = 0     
+          dot_count_bck = 0
+          
+          row_tmp = row[i] 
+          Col_tmp = col[i] 
+          dot_set_tmp = False
+          color_set_tmp = False
+          for j in range(0,4): 
+             if (self.board.boundar_check(row_tmp,Col_tmp+j)): 
+                 card_fwd = str(self.board.matrix[row_tmp,Col_tmp+j])
+                 if(card_fwd != '0'):
+                   if (card_fwd[0] == previous_color_type_fwd):
+                     color_count_fwd = color_count_fwd + 1
+                   else:
+                     previous_color_type_fwd = card_fwd[0] 
+                     color_count_fwd = 1
+                 
+                   if (card_fwd[2] == previous_dot_type_fwd):
+                     dot_count_fwd = dot_count_fwd + 1
+                   else:
+                     previous_dot_type_fwd = card_fwd[2]
+                     dot_count_fwd = 1
+     
+             if (self.board.boundar_check(row_tmp,Col_tmp-j)): 
+                 card_bck = str(self.board.matrix[row_tmp,Col_tmp-j])
+                 if(card_bck != '0'):
+                   if (card_bck[0] == previous_color_type_bck):
+                     color_count_bck = color_count_bck + 1
+                   else:
+                     previous_color_type_bck = card_bck[0] 
+                     color_count_bck = 1
+             
+                   if (card_bck[2] == previous_dot_type_bck):
+                     dot_count_bck = dot_count_bck + 1
+                   else:
+                     previous_dot_type_bck = card_bck[2]
+                     dot_count_bck = 1
+             
+          if (dot_count_fwd==4 or
+              dot_count_bck == 4):
+                dot_set_tmp = True 
+          if(color_count_bck ==4 or
+             color_count_bck == 4):
+                color_set_tmp = True 
+          
+          color_set = color_set or color_set_tmp
+          dot_set = dot_set or dot_set_tmp                
+            
+        return color_set,dot_set
 
     def _winner_check_diagonal(self):
         
         last_pos = len(self.board.move_list)
         position = self.board.move_list[last_pos].split(':')
-        print('is_winner_decided dict size:'+str(last_pos))
-        if(last_pos>0):
-           print('is_winner_decided last_pos:'+self.board.move_list[last_pos])
-
+#        print('is_winner_decided dict size:'+str(last_pos))
+#        if(last_pos>0):
+#           print('is_winner_decided last_pos:'+self.board.move_list[last_pos])
+        print('position:'+str(position)) 
+        row =  [int(position[0]),int(position[2])] 
+        col =  [int(position[1]),int(position[3])]
         
-        row =  int(position[0]) 
-        col =  int(position[1])
+        color_set = False
+        dot_set = False
         
-        new_card_square_color = self.board.matrix[row,col][0]
-        new_card_dot_color = self.board.matrix[row,col][1]
+        for i in range(0,2):
+          row_c = row[i]
+          col_c = col[i]
+          new_card_square_color = self.board.matrix[row_c, col_c][0]
+          new_card_dot_color = self.board.matrix[row_c, col_c][2]
         
-        color_count_ru = 1
-        dot_count_ru = 1
-        color_count_rd = 1
-        dot_count_rd = 1
-        color_count_lu = 1
-        dot_count_lu = 1
-        color_count_ld = 1
-        dot_count_ld = 1
-        
-        for k in range(1,4):
-              card_ru = str(self.board.matrix[row + k, col + k])
-              card_rd = str(self.board.matrix[row - k, col + k])
-              card_lu = str(self.board.matrix[row + k, col - k])
-              card_ld = str(self.board.matrix[row - k, col - k])
-              
-              if(card_ru != '0'):
+          color_count_ru = 1
+          dot_count_ru = 1
+          color_count_rd = 1
+          dot_count_rd = 1
+          color_count_lu = 1
+          dot_count_lu = 1
+          color_count_ld = 1
+          dot_count_ld = 1
+      
+          for k in range(1,4):
+             if (self.board.boundar_check(row_c + k, col_c + k)):
+               card_ru = str(self.board.matrix[row_c + k, col_c + k])
+               if(card_ru != '0'):
                  if (card_ru[0] == new_card_square_color):
                      color_count_ru = color_count_ru + 1   
-                 if (card_ru[1] == new_card_dot_color):
+                 if (card_ru[2] == new_card_dot_color):
                      dot_count_ru = dot_count_ru + 1
-              
-              if(card_rd != '0'):
+
+             if (self.board.boundar_check(row_c - k, col_c + k)):
+               card_rd = str(self.board.matrix[row_c - k, col_c + k])
+               if(card_rd != '0'):
                  if (card_rd[0] == new_card_square_color):
                      color_count_rd = color_count_rd + 1   
-                 if (card_rd[1] == new_card_dot_color):
+                 if (card_rd[2] == new_card_dot_color):
                      dot_count_rd = dot_count_rd + 1
-                
-              if(card_lu != '0'):
+              
+             if (self.board.boundar_check(row_c + k, col_c - k)):
+               card_lu = str(self.board.matrix[row_c + k, col_c - k])
+               if(card_lu != '0'):
                  if (card_lu[0] == new_card_square_color):
                      color_count_lu = color_count_lu + 1   
-                 if (card_lu[1] == new_card_dot_color):
+                 if (card_lu[2] == new_card_dot_color):
                      dot_count_lu = dot_count_lu + 1
-                
-              if(card_ld != '0'):
+             
+             if (self.board.boundar_check(row_c - k, col_c - k)):
+               card_ld = str(self.board.matrix[row_c - k, col_c - k])
+               if(card_ld != '0'):
                  if (card_ld[0] == new_card_square_color):
                      color_count_ld = color_count_ld + 1   
-                 if (card_ld[1] == new_card_dot_color):
+                 if (card_ld[2] == new_card_dot_color):
                      dot_count_ld = dot_count_ld + 1
-            
-            
-        dot_count = 0
-        color_count = 0   
-        if ( color_count_ru == 4 or
-           color_count_rd == 4 or
-           color_count_lu == 4 or
-           color_count_ld == 4 ):
-           color_count = 4
+         
+          color_set_tmp = False
+          dot_set_tmp = False
+          
+          if ( color_count_ru == 4 or
+               color_count_rd == 4 or
+               color_count_lu == 4 or
+               color_count_ld == 4 ):
+                   color_set_tmp = True
         
-        if( dot_count_ru == 4 or
+          if( dot_count_ru == 4 or
               dot_count_rd == 4 or
               dot_count_lu == 4 or
               dot_count_ld == 4 ):
-                  dot_count = 4
-        
-        return dot_count,color_count
+                  dot_set_tmp = True
+         
+          color_set = color_set or color_set_tmp
+          dot_set = dot_set or dot_set_tmp
+                  
+        return color_set,dot_set
 
-    
     def disply_board(self):
         self.board.print_board()

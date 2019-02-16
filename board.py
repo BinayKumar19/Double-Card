@@ -32,21 +32,21 @@ class Board:
       row, column = self._position_translation(row, column)          
       part2_row, part2_col = self._card_part2_position(card_angle, row, column)  
      
-      print('row:'+str(row))
-      print('column:'+str(column))
-      print('part2_col:'+str(part2_col))
-      print('part2_row:'+str(part2_row))
-           
+#      print('row:'+str(row))
+#      print('column:'+str(column))
+#      print('part2_col:'+str(part2_col))
+#      print('part2_row:'+str(part2_row))
+#           
       if (self.is_new_move_valid(card_angle,row, column, part2_row, part2_col)):  
         card.rotate_card(card_angle)  
-        print('part1:'+str(card.part1))
-        print('part2:'+str(card.part2))
-    
+#        print('part1:'+str(card.part1))
+#        print('part2:'+str(card.part2))
+#    
         self.matrix[row , column] = card.part1['square']+':'+card.part1['circle']
         self.matrix[part2_row , part2_col] = card.part2['square']+':'+card.part2['circle'] 
         self.card_list[str(row)+str(column)] = card
         moves_count = len(self.move_list)
-        self.move_list[moves_count+1] = str(row)+':'+str(column)
+        self.move_list[moves_count+1] = str(row)+':'+str(column)+':'+str(part2_row)+':'+str(part2_col)
         return True
       else:
         return False
@@ -99,15 +99,21 @@ class Board:
         return card
         
       
+    def boundar_check(self,row, column):
+        if(row < 0 or row > 11 or 
+           column <0 or column > 7): 
+            return False
+        return True
+        
+    
     def is_new_move_valid(self, card_angle, row, column, part2_row, part2_col):
         
         #Boundary Validation
-        if(row < 0 or row > 11 or 
-           part2_row<0 or part2_row > 11 or
-           column <0 or column > 7 or 
-           part2_col <0 or part2_col > 7):
-            return False
-        
+        status = self.boundar_check(row,column) 
+        status = status and self.boundar_check(part2_row,part2_col)
+        if(not status):
+            return status
+
         #to check if there is card under the given position        
          
         if (card_angle in ('1','3','5','7') and row >0):

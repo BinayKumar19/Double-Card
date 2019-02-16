@@ -31,7 +31,7 @@ def play_game(new_game):
         
          status = new_game.get_stage()
          new_game.disply_board()
-        
+         print(status)
          if (status == GameStage.end):
              break
          elif (status == GameStage.REC):
