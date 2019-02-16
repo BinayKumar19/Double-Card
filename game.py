@@ -90,9 +90,9 @@ class Game:
            return status             
        
        color_set, dot_set = self._winner_check_horizontal()
-##       print(dot_count)
-##       print(color_count)
-##       
+       print('Horizontal color_set:'+str(color_set))
+       print('Horizontal dot_set:'+str(dot_set))
+          
        status = self._set_winner(color_set, dot_set)
        if status:
            return status
@@ -177,7 +177,7 @@ class Game:
           if (dot_count_fwd==4 or
               dot_count_bck == 4):
                 dot_set_tmp = True 
-          if(color_count_bck ==4 or
+          if(color_count_fwd ==4 or
              color_count_bck == 4):
                 color_set_tmp = True 
           
@@ -244,7 +244,7 @@ class Game:
           if (dot_count_fwd==4 or
               dot_count_bck == 4):
                 dot_set_tmp = True 
-          if(color_count_bck ==4 or
+          if(color_count_fwd ==4 or
              color_count_bck == 4):
                 color_set_tmp = True 
           
