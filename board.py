@@ -70,7 +70,7 @@ class Board:
       
       if (self.is_new_move_valid(card_angle, row, column, new_part2_row, new_part2_col)):  
        part1_row, part1_col = self._position_translation(part1_row, part1_col)
-       last_move = self.move_list[len(self.move_list)].split[':']          
+       last_move = str(self.move_list[len(self.move_list)]).split(':')          
        
        if(part1_row == last_move[0] and part1_col == last_move[1]):
           print('Can''t move the last card played by the other player')    

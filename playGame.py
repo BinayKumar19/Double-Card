@@ -44,7 +44,7 @@ def play_game(new_game):
          if (status == GameStage.end):
              break
          elif (status == GameStage.REC):
-            print('No cards left, time to play the Recycle moves')
+            print('Only Recycle moves allowed now')
          else:
             print('else')
            
