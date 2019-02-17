@@ -37,20 +37,25 @@ class Game:
     
     def play_regular_move(self, card_angle, row , column):
         
-        card = self.players[self.current_turn].get_card()
-        result = self.board.regular_move(card, card_angle, row, column) 
-        print('card placement for card'+ str(len(self.board.card_list))+' :'+str(result))
+        if (self.players[self.current_turn].card_available()):
+          card = self.players[self.current_turn].get_card()
+          result = self.board.regular_move(card, card_angle, row, column) 
+          print('card placement for card'+ str(len(self.board.card_list))+' :'+str(result))
         
-        if (result):
+          if (result):
             self.is_winner_decided();
             if (len(self.board.card_list)==24):
                self.stage = GameStage.REC
             return result
-        else:
+          else:
             print('Illegal Move')
+        else:
+            self.stage = GameStage.REC
      
-    def play_recycle_move(self, card_angle, row , column):
-         result = self.board.recycle_move(card_angle, row, column) 
+    def play_recycle_move(self, prev_part1_row,prev_part1_col,prev_part2_row,
+                                        prev_part2_col,card_angle, row , column):
+         result = self.board.recycle_move(prev_part1_row,prev_part1_col,prev_part2_row,
+                                        prev_part2_col,card_angle, row , column) 
          return result
           
     def print_board(self):
@@ -66,16 +71,16 @@ class Game:
 
         if (color_set and
             self.players[self.current_turn].preference_type == PreferenceType.C): 
-              self.winner = self.players[self.current_turn].player_name 
+              self.winner = self.players[self.current_turn] 
         elif(dot_set and
              self.players[self.current_turn].preference_type == PreferenceType.D):
-              self.winner = self.players[self.current_turn].player_name 
+              self.winner = self.players[self.current_turn] 
         elif(color_set and
             self.players[self.current_turn].preference_type == PreferenceType.D):
-              self.winner = self.players[1 - self.current_turn].player_name          
+              self.winner = self.players[1 - self.current_turn]          
         elif(dot_set and
             self.players[self.current_turn].preference_type == PreferenceType.C):
-              self.winner = self.players[1 - self.current_turn].player_name    
+              self.winner = self.players[1 - self.current_turn]    
         else:
              return False
         self.stage = GameStage.end       
@@ -108,11 +113,10 @@ class Game:
         return self.stage
             
     def print_result(self):
-        print('print result called:self.winner:'+str(self.winner))
         if (self.winner =='N'):
             print('Draw')
         else:
-            print('Winner is '+self.winner)     
+            print('Winner is '+self.winner.player_name+'('+str(self.winner.preference_type.value)+')')     
         
 
     def _winner_check_vertical(self):
@@ -139,7 +143,7 @@ class Game:
           dot_set_tmp = False
           color_set_tmp = False
           for j in range(0,4): 
-             if (self.board.boundar_check(row_tmp+j,Col_tmp)): 
+             if (self.board.boundary_check(row_tmp+j,Col_tmp)): 
                  card_fwd = str(self.board.matrix[row_tmp+j,Col_tmp])
                  if(card_fwd != '0'):
                    if (card_fwd[0] == previous_color_type_fwd):
@@ -154,7 +158,7 @@ class Game:
                      previous_dot_type_fwd = card_fwd[2]
                      dot_count_fwd = 1
      
-             if (self.board.boundar_check(row_tmp-j,Col_tmp)): 
+             if (self.board.boundary_check(row_tmp-j,Col_tmp)): 
                  card_bck = str(self.board.matrix[row_tmp-j,Col_tmp])
                  if(card_bck != '0'):
                    if (card_bck[0] == previous_color_type_bck):
@@ -206,7 +210,7 @@ class Game:
           dot_set_tmp = False
           color_set_tmp = False
           for j in range(0,4): 
-             if (self.board.boundar_check(row_tmp,Col_tmp+j)): 
+             if (self.board.boundary_check(row_tmp,Col_tmp+j)): 
                  card_fwd = str(self.board.matrix[row_tmp,Col_tmp+j])
                  if(card_fwd != '0'):
                    if (card_fwd[0] == previous_color_type_fwd):
@@ -221,7 +225,7 @@ class Game:
                      previous_dot_type_fwd = card_fwd[2]
                      dot_count_fwd = 1
      
-             if (self.board.boundar_check(row_tmp,Col_tmp-j)): 
+             if (self.board.boundary_check(row_tmp,Col_tmp-j)): 
                  card_bck = str(self.board.matrix[row_tmp,Col_tmp-j])
                  if(card_bck != '0'):
                    if (card_bck[0] == previous_color_type_bck):
@@ -278,7 +282,7 @@ class Game:
           dot_count_ld = 1
       
           for k in range(1,4):
-             if (self.board.boundar_check(row_c + k, col_c + k)):
+             if (self.board.boundary_check(row_c + k, col_c + k)):
                card_ru = str(self.board.matrix[row_c + k, col_c + k])
                if(card_ru != '0'):
                  if (card_ru[0] == new_card_square_color):
@@ -286,7 +290,7 @@ class Game:
                  if (card_ru[2] == new_card_dot_color):
                      dot_count_ru = dot_count_ru + 1
 
-             if (self.board.boundar_check(row_c - k, col_c + k)):
+             if (self.board.boundary_check(row_c - k, col_c + k)):
                card_rd = str(self.board.matrix[row_c - k, col_c + k])
                if(card_rd != '0'):
                  if (card_rd[0] == new_card_square_color):
@@ -294,7 +298,7 @@ class Game:
                  if (card_rd[2] == new_card_dot_color):
                      dot_count_rd = dot_count_rd + 1
               
-             if (self.board.boundar_check(row_c + k, col_c - k)):
+             if (self.board.boundary_check(row_c + k, col_c - k)):
                card_lu = str(self.board.matrix[row_c + k, col_c - k])
                if(card_lu != '0'):
                  if (card_lu[0] == new_card_square_color):
@@ -302,7 +306,7 @@ class Game:
                  if (card_lu[2] == new_card_dot_color):
                      dot_count_lu = dot_count_lu + 1
              
-             if (self.board.boundar_check(row_c - k, col_c - k)):
+             if (self.board.boundary_check(row_c - k, col_c - k)):
                card_ld = str(self.board.matrix[row_c - k, col_c - k])
                if(card_ld != '0'):
                  if (card_ld[0] == new_card_square_color):

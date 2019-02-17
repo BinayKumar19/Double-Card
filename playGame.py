@@ -14,20 +14,29 @@ def play_game(new_game):
         lines = input_line.split('\n')
         for move_index in range(0,len(lines)):
          input_move = lines[move_index].split(" ")
-         card_move = input_move[0]
-         card_angle = input_move[1]
-         row = input_move[3]
-         column = input_move[2]
+         input_first = input_move[0]
+            
 #         print('card_move:'+card_move)
 #         print('card_angle:'+card_angle)
 #         print('row:'+row)
 #         print('column:'+column)
 #         print('before calling move func')
-         print('\nmove: '+lines[move_index])         
-         if (card_move=='0'):
-           new_game.play_regular_move(card_angle, row , column)
+         print('\nmove '+str(len(new_game.board.move_list)+1)+': '+lines[move_index])         
+         if (input_first=='0'):
+             card_angle = input_move[1]
+             row = input_move[3]
+             column = input_move[2]
+             new_game.play_regular_move(card_angle, row , column)
          else:
-           new_game.play_recycle_move(card_angle, row , column)     
+             prev_part1_row = input_move[1]
+             prev_part1_col = input_first
+             prev_part2_row = input_move[3]
+             prev_part2_col = input_move[2]
+             card_angle = input_move[4]
+             row = input_move[6]
+             column = input_move[5]
+             new_game.play_recycle_move(prev_part1_row,prev_part1_col,prev_part2_row,
+                                        prev_part2_col,card_angle, row , column)     
         
          status = new_game.get_stage()
          new_game.disply_board()
@@ -35,7 +44,7 @@ def play_game(new_game):
          if (status == GameStage.end):
              break
          elif (status == GameStage.REC):
-            print('No cards left, time to play the Regular moves')
+            print('No cards left, time to play the Recycle moves')
          else:
             print('else')
            

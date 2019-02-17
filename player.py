@@ -12,7 +12,7 @@ class PlayerType(Enum):
 
 class PreferenceType(Enum):
        D = 'DOT'
-       C = 'CIRCLE'
+       C = 'COLOR'
     
 class Card:
     
@@ -48,11 +48,15 @@ class Player:
       self.preference_type = preference_type
       self.cards = []
 
-      for i in range(1,12):
+      for i in range(0,12):
           card = Card()
           self.cards.append(card)
     
     def get_card(self):
-      if (len(self.cards) > 0):
-          card = self.cards.pop()
-          return card
+         return self.cards.pop()
+       
+    def card_available(self):
+       if (len(self.cards) > 0):
+           return True
+       else:
+           return False

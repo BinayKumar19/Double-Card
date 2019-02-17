@@ -59,34 +59,42 @@ class Board:
       return row, column
         
         
-    def recycle_move(self, part1_row, part1_col, part2_row, part2_col,card_angle, row, column):  
+    def recycle_move(self, part1_row, part1_col, part2_row, part2_col, card_angle, row, column):  
       
       if (len(self.card_list)!=24):
           print('Cards still left, Can''t play recycling move now')
           return False
         
       row, column = self._position_translation(row, column)
-        
       new_part2_row, new_part2_col = self._card_part2_position(card_angle, row, column)  
       
       if (self.is_new_move_valid(card_angle, row, column, new_part2_row, new_part2_col)):  
-       
        part1_row, part1_col = self._position_translation(part1_row, part1_col)
        last_move = self.move_list[len(self.move_list)].split[':']          
        
        if(part1_row == last_move[0] and part1_col == last_move[1]):
-          print('Can''t move the latest card played by the other player')    
+          print('Can''t move the last card played by the other player')    
           return False
      
        part2_row, part2_col = self._position_translation(part2_row, part2_col)
+       
+       if (self.matrix[part1_row+1][part1_col]!=0 and 
+           part1_row != row and
+           part1_col != column):
+           return False
+       elif( self.matrix[part2_row+1][part2_col]!=0 and
+             part2_row != new_part2_row and
+             part2_col != new_part2_col):
+           return False
+        
        card =  self._fetch_card(part1_row, part1_col, part2_row, part2_col)
        card.rotate_card(card_angle)          
       
        self.matrix[row , column] = card.part1['square']+':'+card.part1['circle']
-       self.matrix[part2_row , part2_col] = card.part2['square']+':'+card.part2['circle'] 
+       self.matrix[new_part2_row , new_part2_col] = card.part2['square']+':'+card.part2['circle'] 
        self.card_list[str(row) + str(column)] = card
        moves_count = len(self.move_list)
-       self.move_list[moves_count+1] = str(row)+':'+str(column)          
+       self.move_list[moves_count+1] = str(row)+':'+str(column)+':'+str(new_part2_row)+':'+str(new_part2_col)
        return True
       else:
        return False
@@ -99,7 +107,7 @@ class Board:
         return card
         
       
-    def boundar_check(self,row, column):
+    def boundary_check(self,row, column):
         if(row < 0 or row > 11 or 
            column <0 or column > 7): 
             return False
@@ -109,8 +117,8 @@ class Board:
     def is_new_move_valid(self, card_angle, row, column, part2_row, part2_col):
         
         #Boundary Validation
-        status = self.boundar_check(row,column) 
-        status = status and self.boundar_check(part2_row,part2_col)
+        status = self.boundary_check(row,column) 
+        status = status and self.boundary_check(part2_row,part2_col)
         if(not status):
             return status
 
@@ -121,12 +129,12 @@ class Board:
                 self.matrix[part2_row - 1, part2_col] == 0 ):
                 return False
         elif(card_angle in ('2','4','6','8') and row >0):
-            if (str(self.matrix[row-1, column]) == '0'):
+            if (self.matrix[row-1, column] == 0):
                 return False
            
         #To check if the position is empty    
-        if (str(self.matrix[row, column]) != '0' or
-            str(self.matrix[part2_row, part2_col]) != '0' ):
+        if (self.matrix[row, column] != 0 or
+            self.matrix[part2_row, part2_col] != 0 ):
                 return False     
             
         return True
