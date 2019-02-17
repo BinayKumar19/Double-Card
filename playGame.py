@@ -16,11 +16,6 @@ def play_game(new_game):
          input_move = lines[move_index].split(" ")
          input_first = input_move[0]
             
-#         print('card_move:'+card_move)
-#         print('card_angle:'+card_angle)
-#         print('row:'+row)
-#         print('column:'+column)
-#         print('before calling move func')
          print('\nmove '+str(len(new_game.board.move_list)+1)+': '+lines[move_index])         
          if (input_first=='0'):
              card_angle = input_move[1]
@@ -40,13 +35,10 @@ def play_game(new_game):
         
          status = new_game.get_stage()
          new_game.disply_board()
-         print(status)
          if (status == GameStage.end):
              break
          elif (status == GameStage.REC):
             print('Only Recycle moves allowed now')
-         else:
-            print('else')
            
          new_game.change_turn()
          
@@ -71,7 +63,6 @@ def initialize_game():
   else:   
      return 'N'   
    
-
   if(game_mode=='1'):
     player2_type = pt.H
   else:

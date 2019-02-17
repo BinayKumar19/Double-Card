@@ -27,7 +27,6 @@ class Game:
         
     def add_player(self, player):
         self.players.append(player)
-        print('Player added')
     
     def change_turn(self):
         if (self.current_turn == 0):
@@ -40,8 +39,7 @@ class Game:
         if (self.players[self.current_turn].card_available()):
           card = self.players[self.current_turn].get_card()
           result = self.board.regular_move(card, card_angle, row, column) 
-          print('card placement for card'+ str(len(self.board.card_list))+' :'+str(result))
-        
+          
           if (result):
             self.is_winner_decided();
             if (len(self.board.card_list)==24):
@@ -56,18 +54,20 @@ class Game:
                                         prev_part2_col,card_angle, row , column):
          result = self.board.recycle_move(prev_part1_row,prev_part1_col,prev_part2_row,
                                         prev_part2_col,card_angle, row , column) 
+         if (result):
+            self.is_winner_decided();
+            if (len(self.board.move_list)==60):
+               self.stage = GameStage.end
+            return result
+         else:
+            print('Illegal Move')
+        
          return result
           
     def print_board(self):
       print(self.matrix)         
        
     def _set_winner(self, color_set , dot_set):
-         
-#        print('current player:'+str(self.players[self.current_turn].player_name))
-#        print('other player:'+str(self.players[1 - self.current_turn].player_name))
-#        print('dot count:'+str(dot_count))
-#        print('color count:'+str(color_count))
-#        print('current player choice:'+str(self.players[self.current_turn].preference_type))
 
         if (color_set and
             self.players[self.current_turn].preference_type == PreferenceType.C): 
@@ -94,13 +94,8 @@ class Game:
            self.stage = GameStage.end       
            return status             
        
-       color_set_horizontal, dot_set_horizontal = self._winner_check_horizontal()
-       print('Horizontal color_set:'+str(color_set_horizontal))
-       print('Horizontal dot_set:'+str(dot_set_horizontal))
-          
-                   
-       color_set_vertical, dot_set_vertical = self._winner_check_vertical()
-      
+       color_set_horizontal, dot_set_horizontal = self._winner_check_horizontal()    
+       color_set_vertical, dot_set_vertical = self._winner_check_vertical()      
        color_set_diagonal,dot_set_diagonal = self._winner_check_diagonal()
     
        color_set = color_set_horizontal or color_set_vertical or color_set_diagonal
@@ -122,7 +117,6 @@ class Game:
     def _winner_check_vertical(self):
         last_pos = len(self.board.move_list)
         position = self.board.move_list[last_pos].split(':')
-        print('position:'+str(position)) 
         row =  [int(position[0]),int(position[2])] 
         col =  [int(position[1]),int(position[3])]
         color_set = False
@@ -189,7 +183,6 @@ class Game:
         
         last_pos = len(self.board.move_list)
         position = self.board.move_list[last_pos].split(':')
-        print('position:'+str(position)) 
         row =  [int(position[0]),int(position[2])] 
         col =  [int(position[1]),int(position[3])]
         color_set = False
@@ -256,10 +249,6 @@ class Game:
         
         last_pos = len(self.board.move_list)
         position = self.board.move_list[last_pos].split(':')
-#        print('is_winner_decided dict size:'+str(last_pos))
-#        if(last_pos>0):
-#           print('is_winner_decided last_pos:'+self.board.move_list[last_pos])
-        print('position:'+str(position)) 
         row =  [int(position[0]),int(position[2])] 
         col =  [int(position[1]),int(position[3])]
         

@@ -27,21 +27,15 @@ class Board:
       
       return part2_row, part2_col
      
-    def regular_move(self, card, card_angle, row, column):  
+    def regular_move(self, card, card_angle, row_old, column_old):  
             
-      row, column = self._position_translation(row, column)          
+      row, column = self._position_translation(row_old, column_old)          
       part2_row, part2_col = self._card_part2_position(card_angle, row, column)  
-     
-#      print('row:'+str(row))
-#      print('column:'+str(column))
-#      print('part2_col:'+str(part2_col))
-#      print('part2_row:'+str(part2_row))
-#           
+           
       if (self.is_new_move_valid(card_angle,row, column, part2_row, part2_col)):  
-        card.rotate_card(card_angle)  
-#        print('part1:'+str(card.part1))
-#        print('part2:'+str(card.part2))
-#    
+        card.rotate_card(card_angle)              
+        print('card placed at '+ column_old +' ' +row_old +' : '+ (chr(int(part2_col+1) + 96)).upper() +' '+str(int(part2_row)+1))  
+
         self.matrix[row , column] = card.part1['square']+':'+card.part1['circle']
         self.matrix[part2_row , part2_col] = card.part2['square']+':'+card.part2['circle'] 
         self.card_list[str(row)+str(column)] = card
@@ -54,39 +48,37 @@ class Board:
     def _position_translation(self, row, column):
       column = ord(column.lower()) - 96      
       row = int(row) - 1
-      column = int(column) -1
-      
+      column = int(column) -1     
       return row, column
         
         
-    def recycle_move(self, part1_row, part1_col, part2_row, part2_col, card_angle, row, column):  
+    def recycle_move(self, part1_row, part1_col, part2_row, part2_col, card_angle, row_old, column_old):  
       
       if (len(self.card_list)!=24):
           print('Cards still left, Can''t play recycling move now')
           return False
+    
+      print('moving card from '+ part1_col +' ' +part1_row +' : '+ part2_col +' '+part2_row)        
         
-      row, column = self._position_translation(row, column)
+      row, column = self._position_translation(row_old, column_old)
       new_part2_row, new_part2_col = self._card_part2_position(card_angle, row, column)  
       
       if (self.is_new_move_valid(card_angle, row, column, new_part2_row, new_part2_col)):  
        part1_row, part1_col = self._position_translation(part1_row, part1_col)
        last_move = str(self.move_list[len(self.move_list)]).split(':')          
        
-       if(part1_row == last_move[0] and part1_col == last_move[1]):
+       if(part1_row == int(last_move[0]) and part1_col == int(last_move[1])):
           print('Can''t move the last card played by the other player')    
           return False
      
        part2_row, part2_col = self._position_translation(part2_row, part2_col)
        
-       if (self.matrix[part1_row+1][part1_col]!=0 and 
-           part1_row != row and
-           part1_col != column):
-           return False
-       elif( self.matrix[part2_row+1][part2_col]!=0 and
-             part2_row != new_part2_row and
-             part2_col != new_part2_col):
-           return False
-        
+       status = self._recycle_move_validation(row, column, new_part2_row, new_part2_col,part1_row, part1_col, part2_row, part2_col)
+       if (not status): 
+          return status
+
+       print('card placed at '+ column_old +' ' +row_old +' : '+ (chr(int(new_part2_col+1) + 96)).upper() +' '+str(int(new_part2_row)+1))  
+ 
        card =  self._fetch_card(part1_row, part1_col, part2_row, part2_col)
        card.rotate_card(card_angle)          
       
@@ -99,7 +91,22 @@ class Board:
       else:
        return False
       
-     
+    def _recycle_move_validation(self,row, column, new_part2_row, new_part2_col, part1_row, part1_col, part2_row, part2_col):
+      if (self.boundary_check(part1_row+1,part1_col) and
+           (self.matrix[part1_row+1][part1_col]!=0 and 
+           part1_row != row and
+           part1_col != column)):
+           return False
+      elif( self.boundary_check(part2_row+1,part2_col) and
+             self.matrix[part2_row+1][part2_col]!=0 and
+             part2_row != new_part2_row and
+             part2_col != new_part2_col):
+            return False
+      elif(self.matrix[part1_row][part1_col]==0 or
+            self.matrix[part2_row][part2_col]==0 ):
+           return False
+      return True 
+        
     def _fetch_card(self, part1_row, part1_col, part2_row, part2_col):
         card = self.card_list.pop(str(part1_row) + str(part1_col))
         self.matrix[part1_row , part1_col] = 0
