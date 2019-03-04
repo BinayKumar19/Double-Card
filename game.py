@@ -5,7 +5,7 @@ Created on Sat Feb  9 14:48:07 2019
 @author: binay
 """
 from board import Board, GameError
-from player import PreferenceType
+from player import PreferenceType, TreeNode
 from enum import Enum
 
 
@@ -327,3 +327,19 @@ class Game:
             dot_set = dot_set or dot_set_tmp
 
         return color_set, dot_set
+
+    def play_automatic_move(self):
+
+        #find an optimal move
+         board_copy = self.board.copy()
+         root = TreeNode(board_copy)
+         card = self.players[self.current_turn].get_card()
+         self.players[self.current_turn].find_optimal_move(root, card)
+
+         self.tree_traversal(board_copy)
+        # call regular move or recycle move depending on the condition
+
+
+    def tree_traversal(self, board_tmp):
+        board_tmp.
+

@@ -58,7 +58,18 @@ def initialize_game():
     print('Lets Play the Game')
     game_mode = input('Enter 1 - Manual Mode 2 - Automatic Mode')
 
-    player1_type = pt.H
+    if game_mode == '1':
+      player1_type = pt.H
+      player2_type = pt.H
+    else:
+        ai_choice = input('Which player shall AI play: 1 - 1st player \n 2 - 2nd player')
+        if (ai_choice == '1'):
+            player1_type = pt.AI
+            player2_type = pt.H
+        else:
+            player2_type = pt.AI
+            player1_type = pt.H
+
     player1_choice = input('Enter Player1''s Preference choice:\n1 - dots or 2 - colors?\n')
 
     if (player1_choice == '1'):
@@ -69,11 +80,6 @@ def initialize_game():
         player2_choice = PreferenceType.D
     else:
         return 'N'
-
-    if (game_mode == '1'):
-        player2_type = pt.H
-    else:
-        player2_type = pt.AI
 
     player1 = Player('Player 1', player1_type, player1_choice)
     player2 = Player('Player 2', player2_type, player2_choice)
