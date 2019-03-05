@@ -8,7 +8,7 @@ Created on Tue Jan 22 15:06:03 2019
 # AI Game
 import numpy as np
 from enum import Enum
-
+import random
 
 class GameError(Enum):
     UPNE = 'Upper Position Not Empty'
@@ -47,17 +47,19 @@ class Board:
         status, error_code = self.is_new_move_valid(card_angle, row, column, part2_row, part2_col)
 
         if status:
-            card.rotate_card(card_angle)
             print('card placed at ' + column_old + ' ' + row_old + ' : ' + (
                 chr(int(part2_col + 1) + 96)).upper() + ' ' + str(int(part2_row) + 1))
-
-            self.matrix[row, column] = card.part1['square'] + ':' + card.part1['circle']
-            self.matrix[part2_row, part2_col] = card.part2['square'] + ':' + card.part2['circle']
-            self.card_list[str(row) + str(column)] = card
-            moves_count = len(self.move_list)
-            self.move_list[moves_count + 1] = str(row) + ':' + str(column) + ':' + str(part2_row) + ':' + str(part2_col)
+            card.rotate_card(card_angle)
+            self.place_card(card, row, column, part2_row, part2_col)
 
         return status, error_code
+
+    def place_card(self, card, row, column, part2_row, part2_col):
+        self.matrix[row, column] = card.part1['Color'] + ':' + card.part1['Dot']
+        self.matrix[part2_row, part2_col] = card.part2['Color'] + ':' + card.part2['Dot']
+        self.card_list[str(row) + str(column)] = card
+        moves_count = len(self.move_list)
+        self.move_list[moves_count + 1] = str(row) + ':' + str(column) + ':' + str(part2_row) + ':' + str(part2_col)
 
     def _position_translation(self, row, column):
         column = ord(column.lower()) - 96
@@ -97,13 +99,7 @@ class Board:
 
             card = self._fetch_card(part1_row, part1_col, part2_row, part2_col)
             card.rotate_card(card_angle)
-
-            self.matrix[row, column] = card.part1['square'] + ':' + card.part1['circle']
-            self.matrix[new_part2_row, new_part2_col] = card.part2['square'] + ':' + card.part2['circle']
-            self.card_list[str(row) + str(column)] = card
-            moves_count = len(self.move_list)
-            self.move_list[moves_count + 1] = str(row) + ':' + str(column) + ':' + str(new_part2_row) + ':' + str(
-                new_part2_col)
+            self.place_card(card, row, column, new_part2_row, new_part2_col)
 
         return status, error_code
 
@@ -187,3 +183,12 @@ class Board:
                 else:
                     print(str(self.matrix[i, j]) + ' ', end="")
             print()
+
+    def calculate_heuristic_value(self, board_state, max_player, max_player_preference):
+    # # logic for calculation of heuristic value
+    #     for i in range(0, 12):
+    #         for j in range(0, 8):
+    #             card_side = self.matrix[i, j].split(':')
+      return random.randint(1, 10)
+
+    # return heuristic value

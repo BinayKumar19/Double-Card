@@ -7,7 +7,7 @@ Created on Sat Feb  9 14:48:07 2019
 from board import Board, GameError
 from player import PreferenceType, TreeNode
 from enum import Enum
-
+import datetime
 
 class GameStage(Enum):
     REG = 'Regular'
@@ -16,10 +16,12 @@ class GameStage(Enum):
 
 
 class Game:
-    def __init__(self, game_type):
+
+    def __init__(self, game_type, heuristic_level):
         self.game_type = game_type
+        self.heuristic_level = heuristic_level
         self.board = Board()
-        self.current_turn = 0  # not defined
+        self.current_turn = 0
         self.players = []
         self.winner = 'N'
         self.stage = GameStage.REG
@@ -111,6 +113,14 @@ class Game:
 
     def display_board(self):
         self.board.print_board()
+
+    def play_automatic_move(self):
+
+        #find an optimal move
+        card = self.players[self.current_turn].get_card()
+        move = self.players[self.current_turn].find_optimal_move(self.board, card, self.heuristic_level)
+        print('automatic move:')
+        print(move)
 
     def _winner_check_vertical(self):
         last_pos = len(self.board.move_list)
@@ -327,19 +337,4 @@ class Game:
             dot_set = dot_set or dot_set_tmp
 
         return color_set, dot_set
-
-    def play_automatic_move(self):
-
-        #find an optimal move
-         board_copy = self.board.copy()
-         root = TreeNode(board_copy)
-         card = self.players[self.current_turn].get_card()
-         self.players[self.current_turn].find_optimal_move(root, card)
-
-         self.tree_traversal(board_copy)
-        # call regular move or recycle move depending on the condition
-
-
-    def tree_traversal(self, board_tmp):
-        board_tmp.
 
