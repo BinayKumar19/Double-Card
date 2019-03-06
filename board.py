@@ -6,9 +6,11 @@ Created on Tue Jan 22 15:06:03 2019
 """
 
 # AI Game
-import numpy as np
 from enum import Enum
+from utilities import FileWriter
 import random
+import numpy as np
+from player import PreferenceType
 
 class GameError(Enum):
     UPNE = 'Upper Position Not Empty'
@@ -60,6 +62,13 @@ class Board:
         self.card_list[str(row) + str(column)] = card
         moves_count = len(self.move_list)
         self.move_list[moves_count + 1] = str(row) + ':' + str(column) + ':' + str(part2_row) + ':' + str(part2_col)
+
+    def remove_card(self, part1_row, part1_col, part2_row, part2_col):
+        self.matrix[part1_row, part1_col] = 0
+        self.matrix[part2_row, part2_col] = 0
+        self.card_list.pop(str(part1_row) + str(part1_col))
+        moves_count = len(self.move_list)
+        self.move_list.pop(moves_count)
 
     def _position_translation(self, row, column):
         column = ord(column.lower()) - 96
@@ -186,9 +195,20 @@ class Board:
 
     def calculate_heuristic_value(self, board_state, max_player, max_player_preference):
     # # logic for calculation of heuristic value
-    #     for i in range(0, 12):
-    #         for j in range(0, 8):
-    #             card_side = self.matrix[i, j].split(':')
-      return random.randint(1, 10)
+
+
+        # if max_player:
+        #     if max_player_preference == PreferenceType.C:
+        #        pref = 'Color'
+        #     else
+        #         pref = 'Dot'
+        #
+        # for i in range(0, 12):
+        #     for j in range(0, 8):
+        #         card_side = self.matrix[i, j]
+        #         if card_side != 0:
+        #             card_side = card_side.split(':')
+
+        return random.randint(1, 10)
 
     # return heuristic value

@@ -17,9 +17,8 @@ class GameStage(Enum):
 
 class Game:
 
-    def __init__(self, game_type, heuristic_level):
+    def __init__(self, game_type):
         self.game_type = game_type
-        self.heuristic_level = heuristic_level
         self.board = Board()
         self.current_turn = 0
         self.players = []
@@ -118,7 +117,13 @@ class Game:
 
         #find an optimal move
         card = self.players[self.current_turn].get_card()
-        move = self.players[self.current_turn].find_optimal_move(self.board, card, self.heuristic_level)
+        move = self.players[self.current_turn].find_optimal_move(self.board, card)
+        card = move[0]
+        part1_row = move[1]
+        part1_col = move[2]
+        part2_row = move[3]
+        part2_col = move[4]
+        self.board.place_card(card, part1_row, part1_col, part2_row, part2_col)
         print('automatic move:')
         print(move)
 

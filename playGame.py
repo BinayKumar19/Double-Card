@@ -103,10 +103,10 @@ def initialize_game():
         FileWriter.print_trace_file = True
         FileWriter.open_file_writer()
 
-    player1 = Player('Player 1', player1_type, player1_choice,alpha_beta_activated)
-    player2 = Player('Player 2', player2_type, player2_choice,alpha_beta_activated)
-    heuristic_level = 3
-    new_game = Game(game_mode, heuristic_level)
+    player1 = Player('Player 1', player1_type, player1_choice, alpha_beta_activated)
+    player2 = Player('Player 2', player2_type, player2_choice, alpha_beta_activated)
+
+    new_game = Game(game_mode)
     new_game.add_player(player1)
     new_game.add_player(player2)
     return new_game
