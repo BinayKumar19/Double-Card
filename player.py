@@ -81,15 +81,14 @@ class Player:
         self.level2_heuristic_values = []
         new_board = copy.deepcopy(board)
 
-        self.current_level_heuristic_value, optimal_move = self._minimax(new_board, card, self.minimax_level, alpha, beta, True,
-                                                                         self.preference_type)
+        self.current_level_heuristic_value, optimal_move = self._minimax(new_board, card, self.minimax_level, alpha,
+                                                                         beta, True)
 
         FileWriter.write_to_trace_file(self.heuristic_eval_count, self.current_level_heuristic_value,
                                        self.level2_heuristic_values)
         return optimal_move
 
-    def _minimax(self, board_current, card, level, alpha, beta, max_player,
-                 max_player_pref_type):
+    def _minimax(self, board_current, card, level, alpha, beta, max_player):
 
         node = TreeNode(board_current)
         possible_moves = node.find_possible_moves(card)
@@ -106,11 +105,11 @@ class Player:
 
                 if level == 1:
                     self.heuristic_eval_count = self.heuristic_eval_count + 1
-                    node_value_tmp = board_current.calculate_heuristic_value(board_current, max_player,
-                                                                             max_player_pref_type)
+                    node_value_tmp = board_current.calculate_heuristic_value(self.preference_type)
                 else:
                     node_value_tmp, optimal_move = self._minimax(board_current, card, level - 1, alpha,
-                                                                 beta, not max_player, max_player_pref_type)
+                                                                 beta, not max_player)
+                board_current.remove_card(part1_row, part1_col, part2_row, part2_col)
                 if node_value_max < node_value_tmp:
                     optimal_move = value
                     node_value_max = node_value_tmp
@@ -118,7 +117,6 @@ class Player:
                     alpha = max(alpha, node_value_tmp)
                     if beta <= alpha:
                         break
-                board_current.remove_card(part1_row, part1_col, part2_row, part2_col)
 
             if level == (self.minimax_level - 1):
                 self.level2_heuristic_values.append(node_value_max)
@@ -135,11 +133,11 @@ class Player:
                 board_current.place_card(card, part1_row, part1_col, part2_row, part2_col)
 
                 if level == 1:
-                    node_value_tmp = board_current.calculate_heuristic_value(board_current, max_player,
-                                                                             max_player_pref_type)
+                    node_value_tmp = board_current.calculate_heuristic_value(self.preference_type)
                 else:
                     node_value_tmp, optimal_move = self._minimax(board_current, card, level - 1, alpha,
-                                                                 beta, not max_player, max_player_pref_type)
+                                                                 beta, not max_player)
+                board_current.remove_card(part1_row, part1_col, part2_row, part2_col)
                 if node_value_min > node_value_tmp:
                     optimal_move = value
                     node_value_min = node_value_tmp
@@ -147,10 +145,9 @@ class Player:
                     beta = min(beta, node_value_tmp)
                     if beta <= alpha:
                         break
-                board_current.remove_card(part1_row, part1_col, part2_row, part2_col)
-            if level == (self.minimax_level - 1):
+            if level == 2:
                 self.level2_heuristic_values.append(node_value_min)
-            return node_value_min, optimal_move
+        return node_value_min, optimal_move
 
 
 class TreeNode:
