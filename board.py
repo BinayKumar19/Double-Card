@@ -7,10 +7,9 @@ Created on Tue Jan 22 15:06:03 2019
 
 # AI Game
 from enum import Enum
-from utilities import FileWriter
-import random
-import numpy as np
 from player import PreferenceType
+import numpy as np
+import copy
 
 
 class GameError(Enum):
@@ -27,35 +26,13 @@ class GameError(Enum):
 
 
 class Board:
+    total_rows = 12
+    total_columns = 8
 
     def __init__(self):
-        self.matrix = np.zeros(shape=(12, 8), dtype='object')
+        self.matrix = np.zeros(shape=(self.total_rows, self.total_columns), dtype='object')
         self.card_list = {}
         self.move_list = {}
-
-    def _card_part2_position(self, card_angle, row, column):
-        if card_angle in ('1', '3', '5', '7'):
-            part2_col = column + 1
-            part2_row = row
-        elif card_angle in ('2', '4', '6', '8'):
-            part2_row = row + 1
-            part2_col = column
-
-        return part2_row, part2_col
-
-    def regular_move(self, card, card_angle, row_old, column_old):
-        row, column = self._position_translation(row_old, column_old)
-        part2_row, part2_col = self._card_part2_position(card_angle, row, column)
-
-        status, error_code = self.is_new_move_valid(card_angle, row, column, part2_row, part2_col)
-
-        if status:
-            print('card placed at ' + column_old + ' ' + row_old + ' : ' + (
-                chr(int(part2_col + 1) + 96)).upper() + ' ' + str(int(part2_row) + 1))
-            card.rotate_card(card_angle)
-            self.place_card(card, row, column, part2_row, part2_col)
-
-        return status, error_code
 
     def place_card(self, card, part1_row, part1_col, part2_row, part2_col):
         self.matrix[part1_row, part1_col] = card.part1['Color'] + ':' + card.part1['Dot']
@@ -68,122 +45,17 @@ class Board:
     def remove_card(self, part1_row, part1_col, part2_row, part2_col):
         self.matrix[part1_row, part1_col] = 0
         self.matrix[part2_row, part2_col] = 0
-        self.card_list.pop(str(part1_row) + str(part1_col))
+        card = self.card_list.pop(str(part1_row) + str(part1_col))
         moves_count = len(self.move_list)
         self.move_list.pop(moves_count)
 
-    def _position_translation(self, row, column):
-        column = ord(column.lower()) - 96
-        row = int(row) - 1
-        column = int(column) - 1
-        return row, column
-
-    def recycle_move(self, part1_row, part1_col, part2_row, part2_col, card_angle, row_old, column_old):
-
-        if len(self.card_list) != 24:
-            return False, GameError.CSLCPRN
-
-        print('moving card from ' + part1_col + ' ' + part1_row + ' : ' + part2_col + ' ' + part2_row)
-
-        row, column = self._position_translation(row_old, column_old)
-        new_part2_row, new_part2_col = self._card_part2_position(card_angle, row, column)
-
-        status, error_code = self.is_new_move_valid(card_angle, row, column, new_part2_row, new_part2_col)
-        if status:
-            part1_row, part1_col = self._position_translation(part1_row, part1_col)
-            last_move = str(self.move_list[len(self.move_list)]).split(':')
-
-            if (part1_row == int(last_move[0]) and
-                    part1_col == int(last_move[1])):
-                return False, GameError.CMLCPOP
-
-            part2_row, part2_col = self._position_translation(part2_row, part2_col)
-
-            status, error_code = self._recycle_move_validation(row, column, new_part2_row, new_part2_col, part1_row,
-                                                               part1_col,
-                                                               part2_row, part2_col)
-            if not status:
-                return status, error_code
-
-            print('card placed at ' + column_old + ' ' + row_old + ' : ' + (
-                chr(int(new_part2_col + 1) + 96)).upper() + ' ' + str(int(new_part2_row) + 1))
-
-            card = self._fetch_card(part1_row, part1_col, part2_row, part2_col)
-            card.rotate_card(card_angle)
-            self.place_card(card, row, column, new_part2_row, new_part2_col)
-
-        return status, error_code
-
-    def _recycle_move_validation(self, new_part1_row, new_part1_col, new_part2_row, new_part2_col, old_part1_row,
-                                 old_part1_col, old_part2_row, old_part2_col):
-
-        status, error_code = self.boundary_check(old_part1_row + 1, old_part1_col)
-
-        if status:
-            status, error_code = self.boundary_check(old_part2_row + 1, old_part2_row)
-
-        if not status:
-            return status, error_code
-
-        if (old_part1_row == new_part1_row and
-                old_part1_col == new_part1_col and
-                old_part2_row == new_part2_row and
-                old_part2_col == new_part2_col):
-            status = False
-            error_code = GameError.CCPSL
-        elif (self.matrix[old_part1_row + 1][old_part1_col] != 0 or
-              self.matrix[old_part2_row + 1][old_part2_col] != 0):
-            status = False
-            error_code = GameError.UPNE
-        elif (self.matrix[old_part1_row][old_part1_col] == 0 or
-              self.matrix[old_part2_row][old_part2_col] == 0):
-            status = False
-            error_code = GameError.OPE
-
-        return status, error_code
+        return card
 
     def _fetch_card(self, part1_row, part1_col, part2_row, part2_col):
         card = self.card_list.pop(str(part1_row) + str(part1_col))
         self.matrix[part1_row, part1_col] = 0
         self.matrix[part2_row, part2_col] = 0
         return card
-
-    def boundary_check(self, row, column):
-        if (row < 0 or
-                row > 11 or
-                column < 0 or
-                column > 7):
-            return False, GameError.BCF
-        return True, None
-
-    def is_new_move_valid(self, card_angle, row, column, part2_row, part2_col):
-
-        # Boundary Validation
-        status, error_code = self.boundary_check(row, column)
-        if status:
-            status, error_code = self.boundary_check(part2_row, part2_col)
-        else:
-            return status, error_code
-
-        # to check if there is card under the given position
-        if status and row > 0:
-            if card_angle in ('1', '3', '5', '7'):
-                if (self.matrix[row - 1, column] == 0 or
-                        self.matrix[part2_row - 1, part2_col] == 0):
-                    status = False
-                    error_code = GameError.LPE
-            elif card_angle in ('2', '4', '6', '8'):
-                if self.matrix[row - 1, column] == 0:
-                    status = False
-                    error_code = GameError.LPE
-
-        # To check if the position is empty
-        if status and (self.matrix[row, column] != 0 or
-                       self.matrix[part2_row, part2_col] != 0):
-            status = False
-            error_code = GameError.NPNE
-
-        return status, error_code
 
     def print_board(self):
         for i in range(11, -1, -1):
@@ -194,6 +66,77 @@ class Board:
                 else:
                     print(str(self.matrix[i, j]) + ' ', end="")
             print()
+
+    def boundary_check(self, row, column):
+        if (row < 0 or
+                row > 11 or
+                column < 0 or
+                column > 7):
+            return False, GameError.BCF
+        return True, None
+
+    def is_new_move_valid(self, part1_row, part1_col, part2_row, part2_col):
+
+        # Boundary Validation
+        status, error_code = self.boundary_check(part1_row, part1_col)
+        if status:
+            status, error_code = self.boundary_check(part2_row, part2_col)
+        else:
+            return status, error_code
+
+        # to check if there is card under the given position
+        if status and part1_row > 0:
+            if part1_row == part2_row:  # horizontal card
+                if (self.matrix[part1_row - 1, part1_col] == 0 or
+                        self.matrix[part2_row - 1, part2_col] == 0):
+                    status = False
+                    error_code = GameError.LPE
+            elif part1_col == part2_col:  # vertical card
+                if self.matrix[part1_row - 1, part1_col] == 0:
+                    status = False
+                    error_code = GameError.LPE
+
+        # To check if the position is empty
+        if status and (self.matrix[part1_row, part1_col] != 0 or
+                       self.matrix[part2_row, part2_col] != 0):
+            status = False
+            error_code = GameError.NPNE
+
+        return status, error_code
+
+    def is_recycle_move_valid(self, new_part1_row, new_part1_col, new_part2_row, new_part2_col, prev_part1_row,
+                              prev_part1_col, prev_part2_row, prev_part2_col):
+
+        if len(self.card_list) != 24:
+            return False, GameError.CSLCPRN
+
+        last_move = str(self.move_list[len(self.move_list)]).split(':')
+
+        if (prev_part1_row == int(last_move[0]) and
+                prev_part1_col == int(last_move[1])):
+            return False, GameError.CMLCPOP
+
+        if prev_part1_col == prev_part2_col:  # card is vertical
+            if ((prev_part2_row + 1 < self.total_rows) and
+                    self.matrix[prev_part2_row + 1][prev_part1_col] != 0):
+                return False, GameError.UPNE
+        elif prev_part1_row == prev_part2_row:  # card is horizontal
+            if ((prev_part1_row + 1 < self.total_rows) and
+                    self.matrix[prev_part1_row + 1][prev_part1_col] != 0 or
+                    self.matrix[prev_part2_row + 1][prev_part2_col] != 0):
+                return False, GameError.UPNE
+
+        if (prev_part1_row == new_part1_row and
+                prev_part1_col == new_part1_col and
+                prev_part2_row == new_part2_row and
+                prev_part2_col == new_part2_col):
+            return False, GameError.CCPSL
+        elif (self.matrix[prev_part1_row][prev_part1_col] == 0 or
+              self.matrix[prev_part2_row][prev_part2_col] == 0):
+            return False, GameError.OPE
+
+        status, error_code = self.is_new_move_valid(new_part1_row, new_part1_col, new_part2_row, new_part2_col)
+        return status, error_code
 
     def vertical_set_count(self, row, col):
         color_count_bck = [0, 0]
@@ -421,6 +364,97 @@ class Board:
         dot_set = dot_set_horizontal or dot_set_vertical or dot_set_diagonal
 
         return color_set, dot_set
+
+    def find_possible_moves(self, card):
+        if len(self.card_list) >= 24:
+            possible_moves = self.find_possible_recycle_moves()
+        else:
+            possible_moves = self.find_possible_normal_moves(card)
+        return possible_moves
+
+    def find_possible_normal_moves(self, card):
+        move_count = 1
+        possible_moves = {}
+        for part1_col in range(0, 8):
+            part1_row = 0
+            while (part1_row < 12 and
+                   self.matrix[part1_row, part1_col] != 0):
+                part1_row = part1_row + 1
+            if part1_row == 12:
+                continue
+
+            for rotation in range(1, 9):
+                card_tmp = copy.deepcopy(card)
+                card_tmp.rotate_card(str(rotation))
+                if rotation in (1, 3, 5, 7):
+                    part2_col = part1_col + 1
+                    part2_row = part1_row
+                elif rotation in (2, 4, 6, 8):
+                    part2_row = part1_row + 1
+                    part2_col = part1_col
+
+                # check if move is valid or not
+                status, error_code = self.is_new_move_valid(part1_row, part1_col, part2_row, part2_col)
+                if status:
+                    #  print(part1_row, part1_col, part2_row, part2_col)
+                    move = (0, card_tmp, part1_row, part1_col, part2_row, part2_col)
+                    possible_moves[move_count] = move
+                    move_count = move_count + 1
+        return possible_moves
+
+    def find_possible_recycle_moves(self):
+        move_count = 1
+        possible_moves = {}
+        for prev_part1_col in range(0, 8):
+            prev_part1_row = 0
+            while (prev_part1_row < 12 and
+                   self.matrix[prev_part1_row, prev_part1_col] != 0):
+                prev_part1_row = prev_part1_row + 1
+            if prev_part1_row == 12:
+                continue
+            else:
+                prev_part1_row = prev_part1_row - 1
+
+            card = self.card_list.get(str(prev_part1_row) + str(prev_part1_row), None)
+            if card.rotation in ('1', '3', '5', '7'):
+                prev_part2_row = prev_part1_row
+                prev_part2_col = prev_part1_col + 1
+            else:
+                prev_part2_row = prev_part1_row + 1
+                prev_part2_col = prev_part1_col
+
+            if card is not None:
+                for new_part1_col in range(0, 8):
+                    new_part1_row = 0
+                    while (new_part1_row < 12 and
+                           self.matrix[new_part1_row, new_part1_col] != 0):
+                        new_part1_row = new_part1_row + 1
+                    if new_part1_row == 12:
+                        continue
+
+                    for rotation in range(1, 9):
+                        card_tmp = copy.deepcopy(card)
+                        card_tmp.rotate_card(str(rotation))
+                        if rotation in (1, 3, 5, 7):
+                            new_part2_col = new_part1_col + 1
+                            new_part2_row = new_part1_row
+                        elif rotation in (2, 4, 6, 8):
+                            new_part2_row = new_part1_row + 1
+                            new_part2_col = new_part1_col
+
+                        # check if move is valid or not
+                        status, error_code = self.is_recycle_move_valid(new_part1_row, new_part1_col, new_part2_row,
+                                                                        new_part2_col, prev_part1_row,
+                                                                        prev_part1_col, prev_part2_row, prev_part2_col)
+                        if status:
+                            #  print(row, column, part2_row, part2_col)
+                            move = (
+                            1, card_tmp, new_part1_row, new_part1_col, new_part2_row, new_part2_col, prev_part1_row,
+                            prev_part1_col, prev_part2_row, prev_part2_col)
+                            possible_moves[move_count] = move
+                            move_count = move_count + 1
+
+        return possible_moves
 
     def calculate_heuristic_value(self, max_player_preference):
 

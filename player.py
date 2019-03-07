@@ -22,10 +22,9 @@ class PreferenceType(Enum):
 class Card:
 
     def __init__(self):
-        self.side1 = True
         self.part1 = {'Color': 'N', 'Dot': 'N'}
         self.part2 = {'Color': 'N', 'Dot': 'N'}
-        self.rotation = 0
+        self.rotation = None
 
     def _set_side(self, side1_color, side1_dot, side2_color, side2_dot):
         self.part1['Color'] = side1_color
@@ -90,20 +89,30 @@ class Player:
 
     def _minimax(self, board_current, card, level, alpha, beta, max_player):
 
-        node = TreeNode(board_current)
-        possible_moves = node.find_possible_moves(card)
+        possible_moves = board_current.find_possible_moves(card)
         optimal_move = 0
         if max_player:
             node_value_max = float("-inf")
             for key, value in possible_moves.items():
-                card = value[0]
-                part1_row = value[1]
-                part1_col = value[2]
-                part2_row = value[3]
-                part2_col = value[4]
-                board_current.place_card(card, part1_row, part1_col, part2_row, part2_col)
+                move_type = value[0]
+                card = value[1]
+                part1_row = value[2]
+                part1_col = value[3]
+                part2_row = value[4]
+                part2_col = value[5]
+                if move_type == 0:
+                    board_current.place_card(card, part1_row, part1_col, part2_row, part2_col)
+                else:
+                    prev_part1_row = value[6]
+                    prev_part1_col = value[7]
+                    prev_part2_row = value[8]
+                    prev_part2_col = value[9]
+                    board_current.remove_card(prev_part1_row, prev_part1_col, prev_part2_row, prev_part2_col)
+                    board_current.place_card(card, part1_row, part1_col, part2_row, part2_col)
 
-                if level == 1:
+                color_set, dot_set = board_current.check_winner()
+
+                if level == 1 or color_set or dot_set:
                     self.heuristic_eval_count = self.heuristic_eval_count + 1
                     node_value_tmp = board_current.calculate_heuristic_value(self.preference_type)
                 else:
@@ -125,12 +134,21 @@ class Player:
         else:
             node_value_min = float("inf")
             for key, value in possible_moves.items():
-                card = value[0]
-                part1_row = value[1]
-                part1_col = value[2]
-                part2_row = value[3]
-                part2_col = value[4]
-                board_current.place_card(card, part1_row, part1_col, part2_row, part2_col)
+                move_type = value[0]
+                card = value[1]
+                part1_row = value[2]
+                part1_col = value[3]
+                part2_row = value[4]
+                part2_col = value[5]
+                if move_type == 0:
+                    board_current.place_card(card, part1_row, part1_col, part2_row, part2_col)
+                else:
+                    prev_part1_row = value[6]
+                    prev_part1_col = value[7]
+                    prev_part2_row = value[8]
+                    prev_part2_col = value[9]
+                    board_current.remove_card(prev_part1_row, prev_part1_col, prev_part2_row, prev_part2_col)
+                    board_current.place_card(card, part1_row, part1_col, part2_row, part2_col)
 
                 if level == 1:
                     node_value_tmp = board_current.calculate_heuristic_value(self.preference_type)
@@ -148,42 +166,3 @@ class Player:
             if level == 2:
                 self.level2_heuristic_values.append(node_value_min)
         return node_value_min, optimal_move
-
-
-class TreeNode:
-
-    def __init__(self, board):
-        self.board = board
-        self.matrix = board.matrix
-
-    def find_possible_moves(self, card):
-        move_count = 1
-        possible_moves = {}
-        for column in range(0, 8):
-            row = 0
-            while (row < 12 and
-                   self.matrix[row, column] != 0):
-                row = row + 1
-            if row == 12:
-                continue
-            # else:
-            #   row = row - 1
-
-            for rotation in range(1, 9):
-                card_tmp = copy.deepcopy(card)
-                card_tmp.rotate_card(str(rotation))
-                if rotation in (1, 3, 5, 7):
-                    part2_col = column + 1
-                    part2_row = row
-                elif rotation in (2, 4, 6, 8):
-                    part2_row = row + 1
-                    part2_col = column
-
-                # check if move is valid or not
-                status, error_code = self.board.is_new_move_valid(str(rotation), row, column, part2_row, part2_col)
-                if status:
-                    #  print(row, column, part2_row, part2_col)
-                    move = (card_tmp, row, column, part2_row, part2_col)
-                    possible_moves[move_count] = move
-                    move_count = move_count + 1
-        return possible_moves

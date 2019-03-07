@@ -7,7 +7,8 @@ Created on Sat Feb  9 14:01:33 2019
 from player import PlayerType as pt
 from player import Player, PreferenceType
 from game import Game, GameStage
-from utilities import FileWriter
+from utilities import FileWriter, position_translation
+
 
 def play_game(new_game):
     print('Initial Stage of the board')
@@ -33,21 +34,32 @@ def play_game(new_game):
                 print('\nmove ' + str(len(new_game.board.move_list) + 1) + ': ' + lines[move_index])
                 if input_first == '0':
                     card_angle = input_move[1]
-                    row = input_move[3]
-                    column = input_move[2]
-                    status, error_code = new_game.play_regular_move(card_angle, row, column)
+                    new_row = input_move[3]
+                    new_col = input_move[2]
+                    card_part1_row, card_part1_col = position_translation(new_row, new_col)
+
+                    status, error_code = new_game.play_regular_move(card_angle, card_part1_row, card_part1_col)
                 else:
                     prev_part1_row = input_move[1]
                     prev_part1_col = input_first
                     prev_part2_row = input_move[3]
                     prev_part2_col = input_move[2]
                     card_angle = input_move[4]
-                    row = input_move[6]
-                    column = input_move[5]
+                    new_row = input_move[6]
+                    new_col = input_move[5]
+                    print(
+                        'moving card from ' + prev_part1_col + ' ' + prev_part1_row + ' : ' + prev_part2_col + ' ' + prev_part2_row)
+
+                    prev_part1_row, prev_part1_col = position_translation(prev_part1_row, prev_part1_col)
+                    new_part1_row, new_part1_col = position_translation(new_row, new_col)
+                    prev_part2_row, prev_part2_col = position_translation(prev_part2_row, prev_part2_col)
+
                     status, error_code = new_game.play_recycle_move(prev_part1_row, prev_part1_col, prev_part2_row,
-                                                                    prev_part2_col, card_angle, row, column)
+                                                                    prev_part2_col, card_angle, new_part1_row,
+                                                                    new_part1_col)
 
                 if status:
+
                     new_game.display_board()
                     if new_game.get_stage() == GameStage.end:
                         break
@@ -62,16 +74,16 @@ def play_game(new_game):
             break
 
     new_game.print_result()
-    FileWriter.close_file_writer()
+
 
 def initialize_game():
     print('Lets Play the Game')
     game_mode = input('Enter 1 - Manual Mode 2 - Automatic Mode')
     player1_choice = input('Enter Player1''s Preference choice:\n1 - dots or 2 - colors?\n')
-    if (player1_choice == '1'):
+    if player1_choice == '1':
         player1_choice = PreferenceType.D
         player2_choice = PreferenceType.C
-    elif (player1_choice == '2'):
+    elif player1_choice == '2':
         player1_choice = PreferenceType.C
         player2_choice = PreferenceType.D
     else:
@@ -109,6 +121,7 @@ def initialize_game():
     game.add_player(player1)
     game.add_player(player2)
     return game
+
 
 new_game = initialize_game()
 if new_game != 'N':
