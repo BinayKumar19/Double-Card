@@ -83,7 +83,7 @@ class Game:
         if status:
             card = self.board.remove_card(prev_part1_row, prev_part1_col, prev_part2_row, prev_part2_col)
             card.rotate_card(card_angle)
-            self.board.place_card(new_part1_row, new_part1_col, new_part2_row, new_part2_col)
+            self.board.place_card(card, new_part1_row, new_part1_col, new_part2_row, new_part2_col)
             print('card placed at ' + (chr(int(new_part1_col + 1) + 96)).upper() + ' ' + str(
                 int(new_part1_row) + 1) + ' : ' + (chr(int(new_part2_col + 1) + 96)).upper() + ' ' + str(
                 int(new_part2_row) + 1))
