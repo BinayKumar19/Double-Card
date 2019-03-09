@@ -49,14 +49,13 @@ class Game:
     def play_regular_move(self, card_rotation, card_part1_row, card_part1_col):
 
         if self.players[self.current_turn].card_available():
-            card = self.players[self.current_turn].get_card()
-            card.rotate_card(card_rotation)
             card_part2_row, card_part2_col = self._card_part2_position(card_rotation, card_part1_row,
                                                                        card_part1_col)
-
             status, error_code = self.board.is_new_move_valid(card_part1_row, card_part1_col,
                                                               card_part2_row, card_part2_col)
             if status:
+                card = self.players[self.current_turn].get_card()
+                card.rotate_card(card_rotation)
                 self.board.place_card(card, card_part1_row, card_part1_col, card_part2_row, card_part2_col)
                 print('card placed at ' + (chr(int(card_part1_col + 1) + 96)).upper() + ' ' + str(
                     int(card_part1_row) + 1) + ' : ' + (chr(int(card_part2_col + 1) + 96)).upper() + ' ' + str(
