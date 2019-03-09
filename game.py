@@ -187,8 +187,7 @@ class Game:
     def play_automatic_move(self):
 
         # find an optimal move
-        card = self.players[self.current_turn].get_card()
-        move = self.players[self.current_turn].find_optimal_move(self.board, card)
+        move = self.players[self.current_turn].find_optimal_move(self.board)
         move_type = move[0]
         card = move[1]
         part1_row = move[2]

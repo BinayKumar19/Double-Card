@@ -82,6 +82,11 @@ class Player:
         self.level2_heuristic_values = []
         new_board = copy.deepcopy(board)
 
+        if len(self.cards) == 0:
+            card = None
+        else:
+            card = self.get_card()
+
         self.current_level_heuristic_value, optimal_move = self._minimax(new_board, card, self.minimax_level, alpha,
                                                                          beta, True)
 
