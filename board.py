@@ -12,6 +12,7 @@ import numpy as np
 import copy
 from utilities import GameError
 
+
 class Board:
     total_rows = 12
     total_columns = 8
@@ -438,8 +439,8 @@ class Board:
                         if status:
                             #  print(row, column, part2_row, part2_col)
                             move = (
-                            1, card_tmp, new_part1_row, new_part1_col, new_part2_row, new_part2_col, prev_part1_row,
-                            prev_part1_col, prev_part2_row, prev_part2_col)
+                                1, card_tmp, new_part1_row, new_part1_col, new_part2_row, new_part2_col, prev_part1_row,
+                                prev_part1_col, prev_part2_row, prev_part2_col)
                             possible_moves[move_count] = move
                             move_count = move_count + 1
 

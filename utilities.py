@@ -22,19 +22,20 @@ class FileWriter:
 
 
 class GameError(Enum):
-    UPNE = 'Upper Position Not Empty'
-    LPE = 'Lower Position Empty'
-    OPE = 'Old Position Empty'
-    CCPSL = 'Card can''t be placed at the same location'
-    ORMAN = 'Only Recycle moves allowed now'
+    UPNE = 'Upper position should be empty'
+    LPE = 'Lower Position should not be empty'
     CVE = 'Column value should be between A-H'
     RVE = 'Row value should be between 1-12'
     IIP = 'Invalid Input Position'
-    NPNE = 'New Position not Empty'
-    CSLCPRN = 'Cards still left, Can''t play recycling move now'
-    CMLCPOP = 'Can''t move the last card played by the other player'
+    NPNE = 'New Position should be empty'
     IVE = "Input Value Error"
-
+    CSLCPRN = 'Cards still left, Can''t play recycling move now'
+    CMLCPOP = 'Recycle move: Can''t move the last card played by the other player'
+    OPE = 'Recycle move: Previous position is empty'
+    CCPSL = 'Recycle move: Card can''t be placed at the same location'
+    ORMAN = 'Recycle move: Only recycle moves allowed now'
+    IRV   = 'Rotation Value should be between 1-8'
+    FCE   = 'Valid values for the first character are 0 for a regular move and A-H for a recycle move'
 
 def position_translation(row, column):
     if column.isnumeric():
@@ -46,5 +47,3 @@ def position_translation(row, column):
     column = int(column) - 1
     row = int(row) - 1
     return row, column
-
-

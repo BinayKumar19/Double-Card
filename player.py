@@ -5,7 +5,7 @@ Created on Sat Feb  9 14:18:38 2019
 @author: binay
 """
 from enum import Enum
-from utilities import FileWriter
+from utilities import FileWriter, GameError
 import copy
 
 
@@ -41,6 +41,8 @@ class Card:
             self._set_side('R', 'W', 'W', 'B')
         elif rotation_value in ('6', '7'):
             self._set_side('W', 'B', 'R', 'W')
+        else:
+            raise ValueError(GameError.IRV.value)
 
         self.rotation = rotation_value
 

@@ -9,6 +9,7 @@ from player import PreferenceType
 from enum import Enum
 from utilities import position_translation, GameError
 
+
 class GameStage(Enum):
     REG = 'Regular'
     REC = 'Recycle'
@@ -42,7 +43,7 @@ class Game:
             part2_row = row + 1
             part2_col = column
         else:
-            raise ValueError('Card Rotation should have a value between 1-8')
+            raise ValueError(GameError.IRV.value)
         return part2_row, part2_col
 
     def play_regular_move(self, card_rotation, card_part1_row, card_part1_col):
@@ -173,7 +174,7 @@ class Game:
                                                             prev_part2_col, card_rotation, new_part1_row,
                                                             new_part1_col)
             else:
-                raise ValueError('Valid values for the first character is 0 for a regular move and A-H for a recycle move')
+                raise ValueError(GameError.FCE.value)
         except ValueError as ve:
             print(repr(ve))
             status = False
