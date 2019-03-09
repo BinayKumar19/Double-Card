@@ -15,7 +15,7 @@ def play_game(new_game):
     new_game.display_board()
     while True:
         player = new_game.players[new_game.current_turn]
-        print(player.player_name +'\'s turn (' + player.player_type.value+')')
+        print(player.player_name +'\'s turn (' + player.player_type.value+'), '+'cards available ' + str(len(player.cards)))
         status = True
         if new_game.players[new_game.current_turn].player_type == PlayerType.AI:
             new_game.play_automatic_move()
