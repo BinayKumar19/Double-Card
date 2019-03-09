@@ -4,10 +4,10 @@ Created on Sat Feb  9 14:01:33 2019
 
 @author: binay
 """
-from player import PlayerType as pt
+from player import PlayerType
 from player import Player, PreferenceType
 from game import Game, GameStage
-from utilities import FileWriter, position_translation
+from utilities import FileWriter, GameError
 
 
 def play_game(new_game):
@@ -15,9 +15,9 @@ def play_game(new_game):
     new_game.display_board()
     while True:
         player = new_game.players[new_game.current_turn]
-        print(player.player_name +'''''''s turn (' +  player.player_type.value+')')
+        print(player.player_name +'\'s turn (' + player.player_type.value+')')
         status = True
-        if new_game.players[new_game.current_turn].player_type == pt.AI:
+        if new_game.players[new_game.current_turn].player_type == PlayerType.AI:
             new_game.play_automatic_move()
         else:
             print('Input the move:')
@@ -30,7 +30,7 @@ def play_game(new_game):
                 new_game.print_result()
                 return
             elif new_game.get_stage() == GameStage.REC:
-                print('Only Recycle moves allowed now')
+                print(GameError.ORMAN.value)
             new_game.change_turn()
         else:
             print(error_code.value)
@@ -38,8 +38,34 @@ def play_game(new_game):
 
 def initialize_game():
     print('Lets Play the Game')
-    game_mode = input('Enter 1 - Manual Mode 2 - Automatic Mode')
-    player1_choice = input('Enter Player1''s Preference choice:\n1 - dots or 2 - colors?\n')
+    game_mode = input('Enter Game Mode Preference:\n1 - Manual Mode \n2 - Automatic Mode\n')
+
+    if game_mode == '1':
+        player1_type = PlayerType.H
+        player2_type = PlayerType.H
+        alpha_beta_activated = False
+    else:
+        ai_choice = input('Which player shall AI play:\n1 - 1st player \n2 - 2nd player\n')
+        if ai_choice == '1':
+            player1_type = PlayerType.AI
+            player2_type = PlayerType.H
+        else:
+            player2_type = PlayerType.AI
+            player1_type = PlayerType.H
+
+        alpha_beta_activated = input('Do you want to activate alpha-beta??\n1- Yes \n2- No\n')
+        if alpha_beta_activated == '1':
+            alpha_beta_activated = True
+        else:
+            alpha_beta_activated = False
+
+        generate_trace_file = input('Do you want to generate a trace of the minimax/alpha-beta?\n1- Yes \n2- No\n')
+
+        if generate_trace_file == '1':
+            FileWriter.print_trace_file = True
+            FileWriter.open_file_writer()
+
+    player1_choice = input('Enter Player1\'s Preference choice:\n1 - dots \n2 - colors\n')
     if player1_choice == '1':
         player1_choice = PreferenceType.D
         player2_choice = PreferenceType.C
@@ -48,31 +74,6 @@ def initialize_game():
         player2_choice = PreferenceType.D
     else:
         return 'N'
-
-    if game_mode == '1':
-        player1_type = pt.H
-        player2_type = pt.H
-        alpha_beta_activated = False
-    else:
-        ai_choice = input('Which player shall AI play: 1 - 1st player \n 2 - 2nd player')
-        if ai_choice == '1':
-            player1_type = pt.AI
-            player2_type = pt.H
-        else:
-            player2_type = pt.AI
-            player1_type = pt.H
-
-        alpha_beta_activated = input('alpha-beta should be activated or not?\n 1- Yes \n 2- No')
-        if alpha_beta_activated == '1':
-            alpha_beta_activated = True
-        else:
-            alpha_beta_activated = False
-
-        generate_trace_file = input('generate a trace of the minimax/alpha-beta?\n 1- Yes \n 2- No')
-
-        if generate_trace_file == '1':
-            FileWriter.print_trace_file = True
-            FileWriter.open_file_writer()
 
     player1 = Player('Player 1', player1_type, player1_choice, alpha_beta_activated)
     player2 = Player('Player 2', player2_type, player2_choice, alpha_beta_activated)
