@@ -10,7 +10,7 @@ import copy
 
 
 class PlayerType(Enum):
-    H = 'HUMAN'
+    H = 'Human'
     AI = 'AI'
 
 
