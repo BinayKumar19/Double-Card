@@ -73,7 +73,7 @@ class Player:
         else:
             return False
 
-    def find_optimal_move(self, board, card):
+    def find_optimal_move(self, board):
 
         # initialise
         alpha = float("-inf")
