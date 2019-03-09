@@ -15,65 +15,24 @@ def play_game(new_game):
     new_game.display_board()
     while True:
         print(new_game.players[new_game.current_turn].player_type)
+        status = True
         if new_game.players[new_game.current_turn].player_type == pt.AI:
             new_game.play_automatic_move()
+        else:
+            print('Input the move:')
+            input_line = input()
+            status, error_code = new_game.play_manual_move(input_line)
+
+        if status:
             new_game.display_board()
             if new_game.get_stage() == GameStage.end:
-                break
+                new_game.print_result()
+                return
             elif new_game.get_stage() == GameStage.REC:
                 print('Only Recycle moves allowed now')
             new_game.change_turn()
         else:
-            print('Input the move:')
-            input_line = input()
-            lines = input_line.split('\n')
-            for move_index in range(0, len(lines)):
-                input_move = lines[move_index].split(" ")
-                input_first = input_move[0]
-
-                print('\nmove ' + str(len(new_game.board.move_list) + 1) + ': ' + lines[move_index])
-                if input_first == '0':
-                    card_angle = input_move[1]
-                    new_row = input_move[3]
-                    new_col = input_move[2]
-                    card_part1_row, card_part1_col = position_translation(new_row, new_col)
-
-                    status, error_code = new_game.play_regular_move(card_angle, card_part1_row, card_part1_col)
-                else:
-                    prev_part1_row = input_move[1]
-                    prev_part1_col = input_first
-                    prev_part2_row = input_move[3]
-                    prev_part2_col = input_move[2]
-                    card_angle = input_move[4]
-                    new_row = input_move[6]
-                    new_col = input_move[5]
-                    print(
-                        'moving card from ' + prev_part1_col + ' ' + prev_part1_row + ' : ' + prev_part2_col + ' ' + prev_part2_row)
-
-                    prev_part1_row, prev_part1_col = position_translation(prev_part1_row, prev_part1_col)
-                    new_part1_row, new_part1_col = position_translation(new_row, new_col)
-                    prev_part2_row, prev_part2_col = position_translation(prev_part2_row, prev_part2_col)
-
-                    status, error_code = new_game.play_recycle_move(prev_part1_row, prev_part1_col, prev_part2_row,
-                                                                    prev_part2_col, card_angle, new_part1_row,
-                                                                    new_part1_col)
-
-                if status:
-
-                    new_game.display_board()
-                    if new_game.get_stage() == GameStage.end:
-                        break
-                    elif new_game.get_stage() == GameStage.REC:
-                        print('Only Recycle moves allowed now')
-
-                    new_game.change_turn()
-                else:
-                    print(error_code.value)
-
-        if new_game.get_stage() == GameStage.end:
-            break
-
-    new_game.print_result()
+            print(error_code.value)
 
 
 def initialize_game():

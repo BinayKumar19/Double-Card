@@ -4,11 +4,10 @@ Created on Sat Feb  9 14:48:07 2019
 
 @author: binay
 """
-from board import Board, GameError
+from board import Board
 from player import PreferenceType
 from enum import Enum
-import datetime
-
+from utilities import position_translation, GameError
 
 class GameStage(Enum):
     REG = 'Regular'
@@ -35,23 +34,23 @@ class Game:
         else:
             self.current_turn = 0
 
-    def _card_part2_position(self, card_angle, row, column):
-        if card_angle in ('1', '3', '5', '7'):
+    def _card_part2_position(self, card_rotation, row, column):
+        if card_rotation in ('1', '3', '5', '7'):
             part2_col = column + 1
             part2_row = row
-        elif card_angle in ('2', '4', '6', '8'):
+        elif card_rotation in ('2', '4', '6', '8'):
             part2_row = row + 1
             part2_col = column
-
+        else:
+            raise ValueError('Card Rotation should have a value between 1-8')
         return part2_row, part2_col
 
-    def play_regular_move(self, card_angle, card_part1_row, card_part1_col):
-        status = False
+    def play_regular_move(self, card_rotation, card_part1_row, card_part1_col):
 
         if self.players[self.current_turn].card_available():
             card = self.players[self.current_turn].get_card()
-            card.rotate_card(card_angle)
-            card_part2_row, card_part2_col = self._card_part2_position(card_angle, card_part1_row,
+            card.rotate_card(card_rotation)
+            card_part2_row, card_part2_col = self._card_part2_position(card_rotation, card_part1_row,
                                                                        card_part1_col)
 
             status, error_code = self.board.is_new_move_valid(card_part1_row, card_part1_col,
@@ -67,6 +66,7 @@ class Game:
                     self.stage = GameStage.REC
 
         else:
+            status = False
             self.stage = GameStage.REC
             error_code = GameError.ORMAN
         return status, error_code
@@ -142,6 +142,48 @@ class Game:
     def display_board(self):
         self.board.print_board()
 
+    def play_manual_move(self, move):
+        input_move = move.split(" ")
+        input_first = input_move[0]
+        try:
+            print('\nmove ' + str(len(self.board.move_list) + 1) + ': ' + move)
+            if input_first == '0':
+                card_rotation = input_move[1]
+                new_row = input_move[3]
+                new_col = input_move[2]
+                card_part1_row, card_part1_col = position_translation(new_row, new_col)
+
+                status, error_code = self.play_regular_move(card_rotation, card_part1_row, card_part1_col)
+            elif input_first.isalpha():
+                prev_part1_row = input_move[1]
+                prev_part1_col = input_first
+                prev_part2_row = input_move[3]
+                prev_part2_col = input_move[2]
+                card_rotation = input_move[4]
+                new_row = input_move[6]
+                new_col = input_move[5]
+                print(
+                    'moving card from ' + prev_part1_col + ' ' + prev_part1_row + ' : ' + prev_part2_col + ' ' + prev_part2_row)
+
+                prev_part1_row, prev_part1_col = position_translation(prev_part1_row, prev_part1_col)
+                new_part1_row, new_part1_col = position_translation(new_row, new_col)
+                prev_part2_row, prev_part2_col = position_translation(prev_part2_row, prev_part2_col)
+
+                status, error_code = self.play_recycle_move(prev_part1_row, prev_part1_col, prev_part2_row,
+                                                            prev_part2_col, card_rotation, new_part1_row,
+                                                            new_part1_col)
+            else:
+                raise ValueError('Valid values for the first character is 0 for a regular move and A-H for a recycle move')
+        except ValueError as ve:
+            print(repr(ve))
+            status = False
+            error_code = GameError.IVE
+        except IndexError:
+            status = False
+            error_code = GameError.IVE
+
+        return status, error_code
+
     def play_automatic_move(self):
 
         # find an optimal move
@@ -177,3 +219,4 @@ class Game:
         self.is_winner_decided()
         if len(self.board.move_list) == 60:
             self.stage = GameStage.end
+        return True, None

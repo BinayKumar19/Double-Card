@@ -1,3 +1,6 @@
+from enum import Enum
+
+
 class FileWriter:
     print_trace_file = False
     file_name = 'trace_file'
@@ -18,8 +21,30 @@ class FileWriter:
                 file.write('\n')
 
 
+class GameError(Enum):
+    UPNE = 'Upper Position Not Empty'
+    LPE = 'Lower Position Empty'
+    OPE = 'Old Position Empty'
+    CCPSL = 'Card can''t be placed at the same location'
+    ORMAN = 'Only Recycle moves allowed now'
+    CVE = 'Column value should be between A-H'
+    RVE = 'Row value should be between 1-12'
+    IIP = 'Invalid Input Position'
+    NPNE = 'New Position not Empty'
+    CSLCPRN = 'Cards still left, Can''t play recycling move now'
+    CMLCPOP = 'Can''t move the last card played by the other player'
+    IVE = "Input Value Error"
+
+
 def position_translation(row, column):
+    if column.isnumeric():
+        raise ValueError('Column value should be an alphabet')
+    if row.isalpha():
+        raise ValueError('Row value should be numeric')
+
     column = ord(column.lower()) - 96
-    row = int(row) - 1
     column = int(column) - 1
+    row = int(row) - 1
     return row, column
+
+

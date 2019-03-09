@@ -10,20 +10,7 @@ from enum import Enum
 from player import PreferenceType
 import numpy as np
 import copy
-
-
-class GameError(Enum):
-    UPNE = 'Upper Position Not Empty'
-    LPE = 'Lower Position Empty'
-    OPE = 'Old Position Empty'
-    CCPSL = 'Card can''t be placed at the same location'
-    ORMAN = 'Only Recycle moves allowed now'
-    BCF = 'Boundary Check Failed'
-    IIP = 'Invalid Input Position'
-    NPNE = 'New Position not Empty'
-    CSLCPRN = 'Cards still left, Can''t play recycling move now'
-    CMLCPOP = 'Can''t move the last card played by the other player'
-
+from utilities import GameError
 
 class Board:
     total_rows = 12
@@ -69,10 +56,12 @@ class Board:
 
     def boundary_check(self, row, column):
         if (row < 0 or
-                row > 11 or
-                column < 0 or
+                row > 11):
+            return False, GameError.RVE
+
+        if (column < 0 or
                 column > 7):
-            return False, GameError.BCF
+            return False, GameError.CVE
         return True, None
 
     def is_new_move_valid(self, part1_row, part1_col, part2_row, part2_col):
