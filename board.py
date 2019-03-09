@@ -406,14 +406,14 @@ class Board:
                 prev_part1_row = prev_part1_row - 1
 
             card = self.card_list.get(str(prev_part1_row) + str(prev_part1_row), None)
-            if card.rotation in ('1', '3', '5', '7'):
-                prev_part2_row = prev_part1_row
-                prev_part2_col = prev_part1_col + 1
-            else:
-                prev_part2_row = prev_part1_row + 1
-                prev_part2_col = prev_part1_col
-
             if card is not None:
+                if card.rotation in ('1', '3', '5', '7'):
+                    prev_part2_row = prev_part1_row
+                    prev_part2_col = prev_part1_col + 1
+                else:
+                    prev_part2_row = prev_part1_row + 1
+                    prev_part2_col = prev_part1_col
+
                 for new_part1_col in range(0, 8):
                     new_part1_row = 0
                     while (new_part1_row < 12 and
