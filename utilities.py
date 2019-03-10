@@ -37,7 +37,7 @@ class GameError(Enum):
     IRV = 'Rotation Value should be between 1-8'
     FCE = 'Valid values for the first character are 0 for a regular move and A-H for a recycle move'
     RMOPE = 'Recycle move: New position should not be over the old position'
-    ICP = 'Invalid card position
+    ICP = 'Invalid card position'
 
 def position_translation(row, column):
     if column.isnumeric():
