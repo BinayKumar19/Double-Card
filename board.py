@@ -22,6 +22,7 @@ class Board:
         self.move_list = {}
 
     def place_card(self, card, part1_row, part1_col, part2_row, part2_col):
+
         self.matrix[part1_row, part1_col] = card.part1['Color'] + ':' + card.part1['Dot']
         self.matrix[part2_row, part2_col] = card.part2['Color'] + ':' + card.part2['Dot']
         self.card_list[str(part1_row) + str(part1_col)] = card
@@ -422,6 +423,10 @@ class Board:
                         new_part1_row = new_part1_row + 1
                     if new_part1_row == 12:
                         continue
+                    key = str(new_part1_row) + str(new_part1_col)
+                    if key in self.card_list:
+                        continue
+
                     error_code = None
                     for rotation in range(1, 9):
                         card_tmp = copy.deepcopy(card)
@@ -432,6 +437,10 @@ class Board:
                         elif rotation in (2, 4, 6, 8):
                             new_part2_row = new_part1_row + 1
                             new_part2_col = new_part1_col
+
+                        key = str(new_part2_row) + str(new_part2_col)
+                        if key in self.card_list:
+                            continue
 
                         # check if move is valid or not
                         status, error_code = self.is_recycle_move_valid(new_part1_row, new_part1_col, new_part2_row,

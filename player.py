@@ -115,7 +115,6 @@ class Player:
                     board_current.matrix[part2_row, part2_col] = card.part2['Color'] + ':' + card.part2['Dot']
                     board_current.card_list[str(part1_row) + str(part1_col)] = card
 
-                    #board_current.place_card(card, part1_row, part1_col, part2_row, part2_col)
 
                 color_set, dot_set = board_current.check_winner()
 
@@ -127,12 +126,10 @@ class Player:
                                                                  beta, not max_player)
 
                 board_current.remove_card(part1_row, part1_col, part2_row, part2_col)
-
                 if move_type == 1:
-                    #board_current.place_card(card_temp, prev_part1_row, prev_part1_col, prev_part2_row, prev_part2_col)
-                    board_current.matrix[prev_part1_row, prev_part1_col] = card_temp.part1['Color'] + ':' + card_temp.part1['Dot']
-                    board_current.matrix[prev_part2_row, prev_part2_col] = card_temp.part2['Color'] + ':' + card_temp.part2['Dot']
-                    board_current.card_list[str(prev_part1_row) + str(prev_part1_col)] = card_temp
+                     board_current.matrix[prev_part1_row, prev_part1_col] = card_temp.part1['Color'] + ':' + card_temp.part1['Dot']
+                     board_current.matrix[prev_part2_row, prev_part2_col] = card_temp.part2['Color'] + ':' + card_temp.part2['Dot']
+                     board_current.card_list[str(prev_part1_row) + str(prev_part1_col)] = card_temp
 
                 if node_value_max < node_value_tmp:
                     optimal_move = value
@@ -160,7 +157,6 @@ class Player:
                     prev_part2_row = value[8]
                     prev_part2_col = value[9]
                     card_temp = board_current.remove_card(prev_part1_row, prev_part1_col, prev_part2_row, prev_part2_col)
-                    #board_current.place_card(card, part1_row, part1_col, part2_row, part2_col)
                     board_current.matrix[part1_row, part1_col] = card.part1['Color'] + ':' + card.part1['Dot']
                     board_current.matrix[part2_row, part2_col] = card.part2['Color'] + ':' + card.part2['Dot']
                     board_current.card_list[str(part1_row) + str(part1_col)] = card
@@ -173,7 +169,6 @@ class Player:
                 board_current.remove_card(part1_row, part1_col, part2_row, part2_col)
 
                 if move_type == 1:
-                    #board_current.place_card(card_temp, prev_part1_row, prev_part1_col, prev_part2_row, prev_part2_col)
                     board_current.matrix[prev_part1_row, prev_part1_col] = card_temp.part1['Color'] + ':' + card_temp.part1['Dot']
                     board_current.matrix[prev_part2_row, prev_part2_col] = card_temp.part2['Color'] + ':' + card_temp.part2['Dot']
                     board_current.card_list[str(prev_part1_row) + str(prev_part1_col)] = card_temp
