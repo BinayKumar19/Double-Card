@@ -47,3 +47,12 @@ def position_translation(row, column):
     column = int(column) - 1
     row = int(row) - 1
     return row, column
+
+class PlayerType(Enum):
+    H = 'Human'
+    AI = 'AI'
+
+
+class PreferenceType(Enum):
+    D = 'DOT'
+    C = 'COLOR'

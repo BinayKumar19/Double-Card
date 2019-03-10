@@ -7,16 +7,7 @@ Created on Sat Feb  9 14:18:38 2019
 from enum import Enum
 from utilities import FileWriter, GameError
 import copy
-
-
-class PlayerType(Enum):
-    H = 'Human'
-    AI = 'AI'
-
-
-class PreferenceType(Enum):
-    D = 'DOT'
-    C = 'COLOR'
+from game import Game, GameStage
 
 
 class Card:
@@ -82,7 +73,7 @@ class Player:
         self.level2_heuristic_values = []
         new_board = copy.deepcopy(board)
 
-        if len(self.cards) == 0:
+        if Game.stage == GameStage.REC :
             card = None
         else:
             card = self.get_card()
@@ -96,7 +87,11 @@ class Player:
 
     def _minimax(self, board_current, card, level, alpha, beta, max_player):
 
-        possible_moves = board_current.find_possible_moves(card)
+        if Game.stage == GameStage.REC:
+            possible_moves = board_current.find_possible_recycle_moves()
+        else:
+            possible_moves = board_current.find_possible_normal_moves(card)
+
         optimal_move = 0
         if max_player:
             node_value_max = float("-inf")
@@ -114,7 +109,7 @@ class Player:
                     prev_part1_col = value[7]
                     prev_part2_row = value[8]
                     prev_part2_col = value[9]
-                    board_current.remove_card(prev_part1_row, prev_part1_col, prev_part2_row, prev_part2_col)
+                    card_temp = board_current.remove_card(prev_part1_row, prev_part1_col, prev_part2_row, prev_part2_col)
                     board_current.place_card(card, part1_row, part1_col, part2_row, part2_col)
 
                 color_set, dot_set = board_current.check_winner()
@@ -125,7 +120,12 @@ class Player:
                 else:
                     node_value_tmp, optimal_move = self._minimax(board_current, card, level - 1, alpha,
                                                                  beta, not max_player)
+
                 board_current.remove_card(part1_row, part1_col, part2_row, part2_col)
+
+                if move_type == 1:
+                    board_current.place_card(card_temp, prev_part1_row, prev_part1_col, prev_part2_row, prev_part2_col)
+
                 if node_value_max < node_value_tmp:
                     optimal_move = value
                     node_value_max = node_value_tmp
@@ -133,9 +133,6 @@ class Player:
                     alpha = max(alpha, node_value_tmp)
                     if beta <= alpha:
                         break
-
-            if level == (self.minimax_level - 1):
-                self.level2_heuristic_values.append(node_value_max)
 
             return node_value_max, optimal_move
         else:
@@ -154,7 +151,7 @@ class Player:
                     prev_part1_col = value[7]
                     prev_part2_row = value[8]
                     prev_part2_col = value[9]
-                    board_current.remove_card(prev_part1_row, prev_part1_col, prev_part2_row, prev_part2_col)
+                    card_temp = board_current.remove_card(prev_part1_row, prev_part1_col, prev_part2_row, prev_part2_col)
                     board_current.place_card(card, part1_row, part1_col, part2_row, part2_col)
 
                 if level == 1:
@@ -163,6 +160,10 @@ class Player:
                     node_value_tmp, optimal_move = self._minimax(board_current, card, level - 1, alpha,
                                                                  beta, not max_player)
                 board_current.remove_card(part1_row, part1_col, part2_row, part2_col)
+
+                if move_type == 1:
+                    board_current.place_card(card_temp, prev_part1_row, prev_part1_col, prev_part2_row, prev_part2_col)
+
                 if node_value_min > node_value_tmp:
                     optimal_move = value
                     node_value_min = node_value_tmp
@@ -172,4 +173,4 @@ class Player:
                         break
             if level == 2:
                 self.level2_heuristic_values.append(node_value_min)
-        return node_value_min, optimal_move
+            return node_value_min, optimal_move

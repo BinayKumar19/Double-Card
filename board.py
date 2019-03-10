@@ -7,10 +7,9 @@ Created on Tue Jan 22 15:06:03 2019
 
 # AI Game
 from enum import Enum
-from player import PreferenceType
 import numpy as np
 import copy
-from utilities import GameError
+from utilities import GameError, PreferenceType
 
 
 class Board:
@@ -36,13 +35,6 @@ class Board:
         card = self.card_list.pop(str(part1_row) + str(part1_col))
         moves_count = len(self.move_list)
         self.move_list.pop(moves_count)
-
-        return card
-
-    def _fetch_card(self, part1_row, part1_col, part2_row, part2_col):
-        card = self.card_list.pop(str(part1_row) + str(part1_col))
-        self.matrix[part1_row, part1_col] = 0
-        self.matrix[part2_row, part2_col] = 0
         return card
 
     def print_board(self):
@@ -55,7 +47,8 @@ class Board:
                     print(str(self.matrix[i, j]) + ' ', end="")
             print()
 
-    def boundary_check(self, row, column):
+    @staticmethod
+    def boundary_check(row, column):
         if (row < 0 or
                 row > 11):
             return False, GameError.RVE
@@ -68,9 +61,9 @@ class Board:
     def is_new_move_valid(self, part1_row, part1_col, part2_row, part2_col):
 
         # Boundary Validation
-        status, error_code = self.boundary_check(part1_row, part1_col)
+        status, error_code = Board.boundary_check(part1_row, part1_col)
         if status:
-            status, error_code = self.boundary_check(part2_row, part2_col)
+            status, error_code = Board.boundary_check(part2_row, part2_col)
         else:
             return status, error_code
 
@@ -111,9 +104,10 @@ class Board:
                     self.matrix[prev_part2_row + 1][prev_part1_col] != 0):
                 return False, GameError.UPNE
         elif prev_part1_row == prev_part2_row:  # card is horizontal
-            if ((prev_part1_row + 1 < self.total_rows) and
-                    self.matrix[prev_part1_row + 1][prev_part1_col] != 0 or
-                    self.matrix[prev_part2_row + 1][prev_part2_col] != 0):
+            if ((prev_part1_row + 1 < self.total_rows and
+                 prev_part2_row + 1 < self.total_rows) and
+                    (self.matrix[prev_part1_row + 1][prev_part1_col] != 0 or
+                     self.matrix[prev_part2_row + 1][prev_part2_col] != 0)):
                 return False, GameError.UPNE
 
         if (prev_part1_row == new_part1_row and
@@ -139,7 +133,7 @@ class Board:
             col_tmp = col[i]
 
             for j in range(0, 4):
-                status, error_code = self.boundary_check(row_tmp - j, col_tmp)
+                status, error_code = Board.boundary_check(row_tmp - j, col_tmp)
 
                 if status:
                     card_bck = str(self.matrix[row_tmp - j, col_tmp])
@@ -193,7 +187,7 @@ class Board:
             row_tmp = row[i]
             col_tmp = col[i]
             for j in range(0, 4):
-                status, error_code = self.boundary_check(row_tmp, col_tmp + j)
+                status, error_code = Board.boundary_check(row_tmp, col_tmp + j)
                 if status:
                     card_fwd = str(self.matrix[row_tmp, col_tmp + j])
                     if card_fwd != '0':
@@ -209,7 +203,7 @@ class Board:
                             previous_dot_type_fwd = card_fwd[2]
                             dot_count_fwd[i] = 1
 
-                status, error_code = self.boundary_check(row_tmp, col_tmp - j)
+                status, error_code = Board.boundary_check(row_tmp, col_tmp - j)
                 if status:
                     card_bck = str(self.matrix[row_tmp, col_tmp - j])
                     if card_bck != '0':
@@ -268,7 +262,7 @@ class Board:
             dot_count_ld = 1
 
             for k in range(1, 4):
-                status, error_code = self.boundary_check(row_c + k, col_c + k)
+                status, error_code = Board.boundary_check(row_c + k, col_c + k)
                 if status:
                     card_ru = str(self.matrix[row_c + k, col_c + k])
                     if card_ru != '0':
@@ -277,7 +271,7 @@ class Board:
                         if card_ru[2] == new_card_dot_color:
                             dot_count_ru = dot_count_ru + 1
 
-                status, error_code = self.boundary_check(row_c - k, col_c + k)
+                status, error_code = Board.boundary_check(row_c - k, col_c + k)
                 if status:
                     card_rd = str(self.matrix[row_c - k, col_c + k])
                     if card_rd != '0':
@@ -286,7 +280,7 @@ class Board:
                         if card_rd[2] == new_card_dot_color:
                             dot_count_rd = dot_count_rd + 1
 
-                status, error_code = self.boundary_check(row_c + k, col_c - k)
+                status, error_code = Board.boundary_check(row_c + k, col_c - k)
                 if status:
                     card_lu = str(self.matrix[row_c + k, col_c - k])
                     if card_lu != '0':
@@ -295,7 +289,7 @@ class Board:
                         if card_lu[2] == new_card_dot_color:
                             dot_count_lu = dot_count_lu + 1
 
-                status, error_code = self.boundary_check(row_c - k, col_c - k)
+                status, error_code = Board.boundary_check(row_c - k, col_c - k)
                 if status:
                     card_ld = str(self.matrix[row_c - k, col_c - k])
                     if card_ld != '0':
@@ -355,13 +349,6 @@ class Board:
 
         return color_set, dot_set
 
-    def find_possible_moves(self, card):
-        if len(self.card_list) >= 24:
-            possible_moves = self.find_possible_recycle_moves()
-        else:
-            possible_moves = self.find_possible_normal_moves(card)
-        return possible_moves
-
     def find_possible_normal_moves(self, card):
         move_count = 1
         possible_moves = {}
@@ -395,25 +382,16 @@ class Board:
     def find_possible_recycle_moves(self):
         move_count = 1
         possible_moves = {}
-        for prev_part1_col in range(0, 8):
-            prev_part1_row = 0
-            while (prev_part1_row < 12 and
-                   self.matrix[prev_part1_row, prev_part1_col] != 0):
-                prev_part1_row = prev_part1_row + 1
-            if prev_part1_row == 12:
-                continue
-            else:
-                prev_part1_row = prev_part1_row - 1
 
-            card = self.card_list.get(str(prev_part1_row) + str(prev_part1_row), None)
+        for move in self.move_list.values():
+            move_positions = move.split(':')
+            prev_part1_row = int(move_positions[0])
+            prev_part1_col = int(move_positions[1])
+            prev_part2_row = int(move_positions[2])
+            prev_part2_col = int(move_positions[3])
+
+            card = self.card_list.get(str(prev_part1_row) + str(prev_part1_col), None)
             if card is not None:
-                if card.rotation in ('1', '3', '5', '7'):
-                    prev_part2_row = prev_part1_row
-                    prev_part2_col = prev_part1_col + 1
-                else:
-                    prev_part2_row = prev_part1_row + 1
-                    prev_part2_col = prev_part1_col
-
                 for new_part1_col in range(0, 8):
                     new_part1_row = 0
                     while (new_part1_row < 12 and
@@ -437,7 +415,6 @@ class Board:
                                                                         new_part2_col, prev_part1_row,
                                                                         prev_part1_col, prev_part2_row, prev_part2_col)
                         if status:
-                            #  print(row, column, part2_row, part2_col)
                             move = (
                                 1, card_tmp, new_part1_row, new_part1_col, new_part2_row, new_part2_col, prev_part1_row,
                                 prev_part1_col, prev_part2_row, prev_part2_col)

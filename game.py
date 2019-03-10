@@ -5,9 +5,8 @@ Created on Sat Feb  9 14:48:07 2019
 @author: binay
 """
 from board import Board
-from player import PreferenceType
 from enum import Enum
-from utilities import position_translation, GameError
+from utilities import position_translation, GameError, PreferenceType
 
 
 class GameStage(Enum):
@@ -17,6 +16,7 @@ class GameStage(Enum):
 
 
 class Game:
+    stage = None
 
     def __init__(self, game_type):
         self.game_type = game_type
@@ -24,7 +24,7 @@ class Game:
         self.current_turn = 0
         self.players = []
         self.winner = 'N'
-        self.stage = GameStage.REG
+        Game.stage = GameStage.REG
 
     def add_player(self, player):
         self.players.append(player)
@@ -63,11 +63,11 @@ class Game:
 
                 self.is_winner_decided()
                 if len(self.board.card_list) == 24:
-                    self.stage = GameStage.REC
+                    Game.stage = GameStage.REC
 
         else:
             status = False
-            self.stage = GameStage.REC
+            Game.stage = GameStage.REC
             error_code = GameError.ORMAN
         return status, error_code
 
@@ -90,7 +90,7 @@ class Game:
 
             self.is_winner_decided()
             if len(self.board.move_list) == 60:
-                self.stage = GameStage.end
+                Game.stage = GameStage.end
             return status, error_code
         else:
             return status, error_code
@@ -114,7 +114,7 @@ class Game:
             self.winner = self.players[1 - self.current_turn]
         else:
             return False
-        self.stage = GameStage.end
+        Game.stage = GameStage.end
         return True
 
     def is_winner_decided(self):
@@ -122,16 +122,13 @@ class Game:
         move_count = len(self.board.move_list)
 
         if move_count == 60:
-            self.stage = GameStage.end
+            Game.stage = GameStage.end
             return status
 
         color_set, dot_set = self.board.check_winner()
         status = self._set_winner(color_set, dot_set)
 
         return status
-
-    def get_stage(self):
-        return self.stage
 
     def print_result(self):
         if self.winner == 'N':
@@ -195,18 +192,20 @@ class Game:
         part2_row = move[4]
         part2_col = move[5]
         if move_type == 0:
+            print('Playing automatic regular move')
             self.board.place_card(card, part1_row, part1_col, part2_row, part2_col)
             if len(self.board.card_list) == 24:
-                self.stage = GameStage.REC
+                Game.stage = GameStage.REC
 
         else:
+            print('Playing automatic recycle move')
             prev_part1_row = move[6]
             prev_part1_col = move[7]
             prev_part2_row = move[8]
             prev_part2_col = move[9]
-            print('card placed at ' + (chr(int(prev_part1_row + 1) + 96)).upper() + ' ' + str(
-                int(prev_part1_col) + 1) + ' : ' + (chr(int(prev_part2_row + 1) + 96)).upper() + ' ' + str(
-                int(prev_part2_col) + 1))
+            print('Removing card from ' + (chr(int(prev_part1_col + 1) + 96)).upper() + ' ' + str(
+                int(prev_part1_row) + 1) + ' : ' + (chr(int(prev_part2_col + 1) + 96)).upper() + ' ' + str(
+                int(prev_part2_row) + 1))
 
             self.board.remove_card(prev_part1_row, prev_part1_col, prev_part2_row, prev_part2_col)
             self.board.place_card(card, part1_row, part1_col, part2_row, part2_col)
@@ -217,5 +216,5 @@ class Game:
 
         self.is_winner_decided()
         if len(self.board.move_list) == 60:
-            self.stage = GameStage.end
+            Game.stage = GameStage.end
         return True, None

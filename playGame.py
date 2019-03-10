@@ -4,10 +4,9 @@ Created on Sat Feb  9 14:01:33 2019
 
 @author: binay
 """
-from player import PlayerType
-from player import Player, PreferenceType
+from player import Player
 from game import Game, GameStage
-from utilities import FileWriter, GameError
+from utilities import FileWriter, GameError, PlayerType, PreferenceType
 
 
 def play_game(new_game):
@@ -26,10 +25,10 @@ def play_game(new_game):
 
         if status:
             new_game.display_board()
-            if new_game.get_stage() == GameStage.end:
+            if Game.stage == GameStage.end:
                 new_game.print_result()
                 return
-            elif new_game.get_stage() == GameStage.REC:
+            elif new_game.stage == GameStage.REC:
                 print(GameError.ORMAN.value)
             new_game.change_turn()
         else:
