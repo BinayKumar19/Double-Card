@@ -34,7 +34,7 @@ class Board:
         self.matrix[part2_row, part2_col] = 0
         card = self.card_list.pop(str(part1_row) + str(part1_col))
         moves_count = len(self.move_list)
-        self.move_list.pop(moves_count)
+        #self.move_list.pop(moves_count)
         return card
 
     def print_board(self):
@@ -90,7 +90,7 @@ class Board:
     def is_recycle_move_valid(self, new_part1_row, new_part1_col, new_part2_row, new_part2_col, prev_part1_row,
                               prev_part1_col, prev_part2_row, prev_part2_col):
 
-        if len(self.card_list) != 24:
+        if len(self.card_list) < 24:
             return False, GameError.CSLCPRN
 
         last_move = str(self.move_list[len(self.move_list)]).split(':')
@@ -99,13 +99,24 @@ class Board:
                 prev_part1_col == int(last_move[1])):
             return False, GameError.CMLCPOP
 
+        if new_part1_row == prev_part2_row + 1:
+            if prev_part1_col == prev_part2_col:  # previous position card is vertical
+                if (prev_part1_col == new_part1_col or
+                        prev_part1_col == new_part2_col):
+                        return False, GameError.RMOPE
+            if prev_part1_row == prev_part2_row:  # previous position card is horizontal
+                if ((prev_part1_col == new_part1_col or
+                     prev_part1_col == new_part2_col or
+                     prev_part2_col == new_part1_col or
+                     prev_part2_col == new_part2_col)):
+                    return False, GameError.RMOPE
+
         if prev_part1_col == prev_part2_col:  # card is vertical
             if ((prev_part2_row + 1 < self.total_rows) and
                     self.matrix[prev_part2_row + 1][prev_part1_col] != 0):
                 return False, GameError.UPNE
         elif prev_part1_row == prev_part2_row:  # card is horizontal
-            if ((prev_part1_row + 1 < self.total_rows and
-                 prev_part2_row + 1 < self.total_rows) and
+            if (prev_part1_row + 1 < self.total_rows and
                     (self.matrix[prev_part1_row + 1][prev_part1_col] != 0 or
                      self.matrix[prev_part2_row + 1][prev_part2_col] != 0)):
                 return False, GameError.UPNE
@@ -390,6 +401,16 @@ class Board:
             prev_part2_row = int(move_positions[2])
             prev_part2_col = int(move_positions[3])
 
+            if prev_part1_col == prev_part2_col:  # card is vertical
+                if ((prev_part2_row + 1 < self.total_rows) and
+                        self.matrix[prev_part2_row + 1][prev_part1_col] != 0):
+                    continue
+            elif prev_part1_row == prev_part2_row:  # card is horizontal
+                if (prev_part1_row + 1 < self.total_rows and
+                        (self.matrix[prev_part1_row + 1][prev_part1_col] != 0 or
+                         self.matrix[prev_part2_row + 1][prev_part2_col] != 0)):
+                    continue
+
             card = self.card_list.get(str(prev_part1_row) + str(prev_part1_col), None)
             if card is not None:
                 for new_part1_col in range(0, 8):
@@ -399,7 +420,7 @@ class Board:
                         new_part1_row = new_part1_row + 1
                     if new_part1_row == 12:
                         continue
-
+                    error_code = None
                     for rotation in range(1, 9):
                         card_tmp = copy.deepcopy(card)
                         card_tmp.rotate_card(str(rotation))
@@ -420,6 +441,10 @@ class Board:
                                 prev_part1_col, prev_part2_row, prev_part2_col)
                             possible_moves[move_count] = move
                             move_count = move_count + 1
+                        elif error_code == GameError.UPNE:
+                            break
+                    if error_code == GameError.UPNE:
+                        break
 
         return possible_moves
 

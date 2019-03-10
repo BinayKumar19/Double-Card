@@ -34,8 +34,10 @@ class GameError(Enum):
     OPE = 'Recycle move: Previous position is empty'
     CCPSL = 'Recycle move: Card can''t be placed at the same location'
     ORMAN = 'Recycle move: Only recycle moves allowed now'
-    IRV   = 'Rotation Value should be between 1-8'
-    FCE   = 'Valid values for the first character are 0 for a regular move and A-H for a recycle move'
+    IRV = 'Rotation Value should be between 1-8'
+    FCE = 'Valid values for the first character are 0 for a regular move and A-H for a recycle move'
+    RMOPE = 'Recycle move: New position should not be over the old position'
+
 
 def position_translation(row, column):
     if column.isnumeric():
