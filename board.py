@@ -32,8 +32,10 @@ class Board:
     def remove_card(self, part1_row, part1_col, part2_row, part2_col):
         self.matrix[part1_row, part1_col] = 0
         self.matrix[part2_row, part2_col] = 0
-        card = self.card_list.pop(str(part1_row) + str(part1_col))
-        moves_count = len(self.move_list)
+        card = self.card_list.pop(str(part1_row) + str(part1_col), None)
+        if card is None:
+            raise ValueError(GameError.ICP)
+        #moves_count = len(self.move_list)
         #self.move_list.pop(moves_count)
         return card
 
