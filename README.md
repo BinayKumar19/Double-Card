@@ -11,7 +11,9 @@ Introduction to Artificial Intelligence: Project
    python3 game.py 
    python3 playGame.py
    
-4) Enter 1 for Manual mode
-5) select dots or color for Player 1
-6) now enter the input together for all moves (regular + recycle)
-7) repeat step 4,5,6 for different test scenarios, uploaded test files can be used.
+or 
+
+1) use spider on Anaconda to open the project.
+2) run playGame.py
+3) follow the commands 
+

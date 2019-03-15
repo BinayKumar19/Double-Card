@@ -461,28 +461,57 @@ class Board:
 
     def calculate_heuristic_value(self, max_player_preference):
 
-        last_pos = len(self.move_list)
-        position = self.move_list[last_pos].split(':')
-        row = [int(position[0]), int(position[2])]
-        col = [int(position[1]), int(position[3])]
+        white_circle = 0
+        red_circle = 0
+        white_dot = 0
+        red_dot = 0
 
-        color_hz_bck, dot_hz_bck, color_hz_fwd, dot_hz_fwd = self.horizontal_set_count(row, col)
-        color_count_vertical, dot_count_vertical = self.vertical_set_count(row, col)
-        color_count_all, dot_count_all = self.diagonal_set_count(row, col)
-        color = 0
-        dot = 0
-        for i in range(0, 2):
-            color_count = color_count_all.get(i)
-            dot_count = dot_count_all.get(i)
+        pos = 0
 
-            color = color + color_count[0] + color_count[1] + color_count[2] + color_count[3]
-            color = color + color_hz_bck[i] + color_hz_fwd[i] + color_count_vertical[i]
-            dot = dot + dot_count[0] + dot_count[1] + dot_count[2] + dot_count[3]
-            dot = dot + dot_hz_bck[i] + dot_hz_fwd[i] + dot_count_vertical[i]
+        for i in range(0, 11):
+            for j in range(0, 8):
+                card_side = self.matrix[i, j]
+                pos = pos + 1
+                if card_side != 0:
+                    if card_side == 'W:W':
+                        white_circle = white_circle + pos
+                    elif card_side == 'R:W':
+                        red_circle = red_circle + pos
+                    elif card_side == 'R:B':
+                        red_dot = red_dot + pos
+                    if card_side == 'W:B':
+                        white_dot = white_dot + pos
 
-        value = color - dot
+        e = white_circle + (3*white_dot) - (2 * red_dot) - (1.5*red_circle)
 
         if max_player_preference == PreferenceType.C:
-            return value
+            return round(e, 1)
         else:
-            return -value
+            return -round(e, 1)
+
+
+# last_pos = len(self.move_list)
+        # position = self.move_list[last_pos].split(':')
+        # row = [int(position[0]), int(position[2])]
+        # col = [int(position[1]), int(position[3])]
+        #
+        # color_hz_bck, dot_hz_bck, color_hz_fwd, dot_hz_fwd = self.horizontal_set_count(row, col)
+        # color_count_vertical, dot_count_vertical = self.vertical_set_count(row, col)
+        # color_count_all, dot_count_all = self.diagonal_set_count(row, col)
+        # color = 0
+        # dot = 0
+        # for i in range(0, 2):
+        #     color_count = color_count_all.get(i)
+        #     dot_count = dot_count_all.get(i)
+        #
+        #     color = color + color_count[0] + color_count[1] + color_count[2] + color_count[3]
+        #     color = color + color_hz_bck[i] + color_hz_fwd[i] + color_count_vertical[i]
+        #     dot = dot + dot_count[0] + dot_count[1] + dot_count[2] + dot_count[3]
+        #     dot = dot + dot_hz_bck[i] + dot_hz_fwd[i] + dot_count_vertical[i]
+        #
+        # value = color - dot
+        #
+        # if max_player_preference == PreferenceType.C:
+        #     return value
+        # else:
+        #     return -value
