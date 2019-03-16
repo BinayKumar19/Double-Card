@@ -350,6 +350,9 @@ class Board:
 
     def check_winner(self):
         last_pos = len(self.move_list)
+        if last_pos == 0:
+            return False, False
+
         position = self.move_list[last_pos].split(':')
         row = [int(position[0]), int(position[2])]
         col = [int(position[1]), int(position[3])]
