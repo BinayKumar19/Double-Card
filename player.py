@@ -73,7 +73,7 @@ class Player:
         self.level2_heuristic_values = []
         new_board = copy.deepcopy(board)
 
-        if Game.stage == GameStage.REC :
+        if Game.stage == GameStage.REC:
             card = None
         else:
             card = self.get_card()
@@ -110,34 +110,23 @@ class Player:
                 part2_row = value[4]
                 part2_col = value[5]
                 if move_type == 0:
-                    board_current.place_card(card, part1_row, part1_col, part2_row, part2_col)
+                    board_current.place_card(card, part1_row, part1_col, part2_row, part2_col, True)
                 else:
                     prev_part1_row = value[6]
                     prev_part1_col = value[7]
                     prev_part2_row = value[8]
                     prev_part2_col = value[9]
-                    card_temp = board_current.remove_card(prev_part1_row, prev_part1_col, prev_part2_row, prev_part2_col)
-
-                    board_current.matrix[part1_row, part1_col] = card.part1['Color'] + ':' + card.part1['Dot']
-                    board_current.matrix[part2_row, part2_col] = card.part2['Color'] + ':' + card.part2['Dot']
-                    board_current.card_list[str(part1_row) + str(part1_col)] = card
-
-
-
-                # if level == 1 or color_set or dot_set:
-                #     self.heuristic_eval_count = self.heuristic_eval_count + 1
-                #     node_value_tmp = board_current.calculate_heuristic_value(self.preference_type)
-                # else:
-                #     node_value_tmp, optimal_move = self._minimax(board_current, card, level - 1, alpha,
-                #                                                  beta, not max_player)
+                    card_temp = board_current.remove_card(prev_part1_row, prev_part1_col, prev_part2_row,
+                                                          prev_part2_col, False)
+                    board_current.place_card(card, part1_row, part1_col, part2_row, part2_col, True)
 
                 node_value_tmp, optimal_move = self._minimax(board_current, card, level - 1, alpha,
                                                              beta, not max_player)
-                board_current.remove_card(part1_row, part1_col, part2_row, part2_col)
-                if move_type == 1:
-                     board_current.matrix[prev_part1_row, prev_part1_col] = card_temp.part1['Color'] + ':' + card_temp.part1['Dot']
-                     board_current.matrix[prev_part2_row, prev_part2_col] = card_temp.part2['Color'] + ':' + card_temp.part2['Dot']
-                     board_current.card_list[str(prev_part1_row) + str(prev_part1_col)] = card_temp
+                board_current.remove_card(part1_row, part1_col, part2_row, part2_col, True)
+
+                if move_type == 1:  # revert the recycle move
+                    board_current.place_card(card_temp, prev_part1_row, prev_part1_col, prev_part2_row, prev_part2_col,
+                                             False)
 
                 if node_value_max < node_value_tmp:
                     optimal_move = value
@@ -158,31 +147,24 @@ class Player:
                 part2_row = value[4]
                 part2_col = value[5]
                 if move_type == 0:
-                    board_current.place_card(card, part1_row, part1_col, part2_row, part2_col)
+                    board_current.place_card(card, part1_row, part1_col, part2_row, part2_col, True)
                 else:
                     prev_part1_row = value[6]
                     prev_part1_col = value[7]
                     prev_part2_row = value[8]
                     prev_part2_col = value[9]
-                    card_temp = board_current.remove_card(prev_part1_row, prev_part1_col, prev_part2_row, prev_part2_col)
-                    board_current.matrix[part1_row, part1_col] = card.part1['Color'] + ':' + card.part1['Dot']
-                    board_current.matrix[part2_row, part2_col] = card.part2['Color'] + ':' + card.part2['Dot']
-                    board_current.card_list[str(part1_row) + str(part1_col)] = card
+                    card_temp = board_current.remove_card(prev_part1_row, prev_part1_col, prev_part2_row,
+                                                          prev_part2_col, False)
+                    board_current.place_card(card, part1_row, part1_col, part2_row, part2_col, True)
 
-                # if level == 1:
-                #     node_value_tmp = board_current.calculate_heuristic_value(self.preference_type)
-                # else:
-                #     node_value_tmp, optimal_move = self._minimax(board_current, card, level - 1, alpha,
-                #                                                  beta, not max_player)
+                node_value_tmp, optimal_move = self._minimax(board_current, card, level - 1, alpha, beta,
+                                                             not max_player)
 
-                node_value_tmp, optimal_move = self._minimax(board_current, card, level - 1, alpha, beta, not max_player)
+                board_current.remove_card(part1_row, part1_col, part2_row, part2_col, True)
 
-                board_current.remove_card(part1_row, part1_col, part2_row, part2_col)
-
-                if move_type == 1:
-                    board_current.matrix[prev_part1_row, prev_part1_col] = card_temp.part1['Color'] + ':' + card_temp.part1['Dot']
-                    board_current.matrix[prev_part2_row, prev_part2_col] = card_temp.part2['Color'] + ':' + card_temp.part2['Dot']
-                    board_current.card_list[str(prev_part1_row) + str(prev_part1_col)] = card_temp
+                if move_type == 1:  # revert the recycle move
+                    board_current.place_card(card_temp, prev_part1_row, prev_part1_col, prev_part2_row, prev_part2_col,
+                                             False)
 
                 if node_value_min > node_value_tmp:
                     optimal_move = value

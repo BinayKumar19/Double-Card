@@ -56,7 +56,7 @@ class Game:
             if status:
                 card = self.players[self.current_turn].get_card()
                 card.rotate_card(card_rotation)
-                self.board.place_card(card, card_part1_row, card_part1_col, card_part2_row, card_part2_col)
+                self.board.place_card(card, card_part1_row, card_part1_col, card_part2_row, card_part2_col, True)
                 print('card placed at ' + (chr(int(card_part1_col + 1) + 96)).upper() + ' ' + str(
                     int(card_part1_row) + 1) + ' : ' + (chr(int(card_part2_col + 1) + 96)).upper() + ' ' + str(
                     int(card_part2_row) + 1))
@@ -81,9 +81,9 @@ class Game:
                                                               prev_part1_row, prev_part1_col,
                                                               prev_part2_row, prev_part2_col)
         if status:
-            card = self.board.remove_card(prev_part1_row, prev_part1_col, prev_part2_row, prev_part2_col)
+            card = self.board.remove_card(prev_part1_row, prev_part1_col, prev_part2_row, prev_part2_col, False)
             card.rotate_card(card_angle)
-            self.board.place_card(card, new_part1_row, new_part1_col, new_part2_row, new_part2_col)
+            self.board.place_card(card, new_part1_row, new_part1_col, new_part2_row, new_part2_col, True)
             print('card placed at ' + (chr(int(new_part1_col + 1) + 96)).upper() + ' ' + str(
                 int(new_part1_row) + 1) + ' : ' + (chr(int(new_part2_col + 1) + 96)).upper() + ' ' + str(
                 int(new_part2_row) + 1))
@@ -193,7 +193,7 @@ class Game:
         part2_col = move[5]
         if move_type == 0:
             print('Playing automatic regular move')
-            self.board.place_card(card, part1_row, part1_col, part2_row, part2_col)
+            self.board.place_card(card, part1_row, part1_col, part2_row, part2_col, True)
             if len(self.board.card_list) == 24:
                 Game.stage = GameStage.REC
 
@@ -207,8 +207,8 @@ class Game:
                 int(prev_part1_row) + 1) + ' : ' + (chr(int(prev_part2_col + 1) + 96)).upper() + ' ' + str(
                 int(prev_part2_row) + 1))
 
-            self.board.remove_card(prev_part1_row, prev_part1_col, prev_part2_row, prev_part2_col)
-            self.board.place_card(card, part1_row, part1_col, part2_row, part2_col)
+            self.board.remove_card(prev_part1_row, prev_part1_col, prev_part2_row, prev_part2_col, False)
+            self.board.place_card(card, part1_row, part1_col, part2_row, part2_col, True)
             if (self.board.matrix[part1_row, part1_col] != 0 or
                     self.board.matrix[part2_row, part2_col] != 0):
                     print(GameError.AIGIM.value)
