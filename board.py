@@ -709,7 +709,7 @@ class Board:
         position = self.move_list[last_pos].split(':')
         row = [int(position[0]), int(position[2])]
         col = [int(position[1]), int(position[3])]
-        print(self.move_list)
+        #print(self.move_list)
 
         diagonal_heuristic = self.diagonal_heuristic_calculation(row, col)
         horizontal_heuristic = self.horizontal_heuristic_calculation(row, col)

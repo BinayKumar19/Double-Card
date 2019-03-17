@@ -99,7 +99,6 @@ class Player:
         else:
             possible_moves = board_current.find_possible_normal_moves(card)
 
-        optimal_move = 0
         if max_player:
             node_value_max = float("-inf")
             for key, value in possible_moves.items():
@@ -120,7 +119,7 @@ class Player:
                                                           prev_part2_col, False)
                     board_current.place_card(card, part1_row, part1_col, part2_row, part2_col, True)
 
-                node_value_tmp, optimal_move = self._minimax(board_current, card, level - 1, alpha,
+                node_value_tmp, optimal_move_tmp = self._minimax(board_current, card, level - 1, alpha,
                                                              beta, not max_player)
                 board_current.remove_card(part1_row, part1_col, part2_row, part2_col, True)
 
@@ -129,13 +128,14 @@ class Player:
                                              False)
 
                 if node_value_max < node_value_tmp:
+                    #print('level:'+str(level)+' Max value:'+str(value))
                     optimal_move = value
                     node_value_max = node_value_tmp
                 if self.alpha_beta_activated:
                     alpha = max(alpha, node_value_tmp)
                     if beta <= alpha:
                         break
-
+            #print('before return level:' + str(level) + ' Max value:' + str(optimal_move))
             return node_value_max, optimal_move
         else:
             node_value_min = float("inf")
@@ -157,7 +157,7 @@ class Player:
                                                           prev_part2_col, False)
                     board_current.place_card(card, part1_row, part1_col, part2_row, part2_col, True)
 
-                node_value_tmp, optimal_move = self._minimax(board_current, card, level - 1, alpha, beta,
+                node_value_tmp, optimal_move_tmp = self._minimax(board_current, card, level - 1, alpha, beta,
                                                              not max_player)
 
                 board_current.remove_card(part1_row, part1_col, part2_row, part2_col, True)
@@ -167,6 +167,7 @@ class Player:
                                              False)
 
                 if node_value_min > node_value_tmp:
+                    #print('level:'+str(level)+' Min value:'+str(value))
                     optimal_move = value
                     node_value_min = node_value_tmp
                 if self.alpha_beta_activated:
@@ -175,4 +176,5 @@ class Player:
                         break
             if level == 2:
                 self.level2_heuristic_values.append(node_value_min)
+            #print('before return level:' + str(level) + ' Min value:' + str(optimal_move))
             return node_value_min, optimal_move
