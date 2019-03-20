@@ -17,6 +17,7 @@ class GameStage(Enum):
 
 class Game:
     stage = None
+    draw_move_count = 40
 
     def __init__(self, game_type):
         self.game_type = game_type
@@ -89,7 +90,7 @@ class Game:
                 int(new_part2_row) + 1))
 
             self.is_winner_decided()
-            if len(self.board.move_list) == 60:
+            if len(self.board.move_list) == self.draw_move_count:
                 Game.stage = GameStage.end
             return status, error_code
         else:
@@ -121,7 +122,7 @@ class Game:
         status = False
         move_count = len(self.board.move_list)
 
-        if move_count == 60:
+        if move_count == self.draw_move_count:
             Game.stage = GameStage.end
             return status
 
@@ -221,6 +222,6 @@ class Game:
             int(part2_row) + 1))
 
         self.is_winner_decided()
-        if len(self.board.move_list) == 60:
+        if len(self.board.move_list) == self.draw_move_count:
             Game.stage = GameStage.end
         return True, None

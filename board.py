@@ -17,10 +17,10 @@ class Board:
     total_columns = 8
     # Heuristic parameters
     best_case_value = 1
-    second_best_case_value = 0.75
-    neutral_case_value = 0
+    second_best_case_value = 0.50
+    neutral_case_value = -0.25
     worst_case_value = -1
-    missing_case_value = 0.25
+    missing_case_value = 0
 
     def __init__(self):
         self.matrix = np.zeros(shape=(self.total_rows, self.total_columns), dtype='object')
@@ -472,33 +472,35 @@ class Board:
 
     def diagonal_heuristic_inf(self, row, col):
 
-        # row 0,2 for part1 and row 1,3 for part2 of the placed card
-        diagonal = np.zeros(shape=(4, 8), dtype='object')
+        # Diagonal row 0,2 for part1 diagonals and row 1,3 for part2 diagonals of the placed card
+        #diagonal = np.zeros(shape=(1, 6), dtype='object')
+        diagonal = ['0', '0', '0', '0', '0', '0']
+        diagonals = [diagonal, diagonal, diagonal, diagonal]
 
         for i in range(0, 2):
             row_tmp = row[i]
             col_tmp = col[i]
-            diagonal[i][4] = str(self.matrix[row_tmp, col_tmp])
-            diagonal[i + 2][4] = str(self.matrix[row_tmp, col_tmp])
+            diagonals[i][3] = str(self.matrix[row_tmp, col_tmp])
+            diagonals[i + 2][3] = str(self.matrix[row_tmp, col_tmp])
 
-            for k in range(1, 4):
+            for k in range(1, 3):
                 status, error_code = Board.boundary_check(row_tmp + k, col_tmp + k)
                 if status:
                     card_tmp = str(self.matrix[row_tmp + k, col_tmp + k])
-                    diagonal[i][4 + k] = card_tmp
+                    diagonals[i][3 + k] = card_tmp
                 status, error_code = Board.boundary_check(row_tmp - k, col_tmp - k)
                 if status:
                     card_tmp = str(self.matrix[row_tmp - k, col_tmp - k])
-                    diagonal[i][4 - k] = card_tmp
+                    diagonals[i][3 - k] = card_tmp
                 status, error_code = Board.boundary_check(row_tmp - k, col_tmp + k)
                 if status:
                     card_tmp = str(self.matrix[row_tmp - k, col_tmp + k])
-                    diagonal[i + 2][4 + k] = card_tmp
+                    diagonals[i + 2][3 + k] = card_tmp
                 status, error_code = Board.boundary_check(row_tmp + k, col_tmp - k)
                 if status:
                     card_tmp = str(self.matrix[row_tmp + k, col_tmp - k])
-                    diagonal[i + 2][4 - k] = card_tmp
-        return diagonal
+                    diagonals[i + 2][3 - k] = card_tmp
+        return diagonals
 
     def diagonal_heuristic_calculation(self, row, col):
         heuristic_value = 0
@@ -507,9 +509,9 @@ class Board:
 
         for diagonal in diagonals:
             # print(diagonal)
-            main_part = str(diagonal[4])
-            for j in range(1, 4):
-                current_cell = str(diagonal[4 + j])
+            main_part = str(diagonal[3])
+            for j in range(1, 3):
+                current_cell = str(diagonal[3 + j])
                 if current_cell != '0':
                     # print(current_cell +':'+ main_part)
                     if current_cell[0] == main_part[0]:
@@ -527,7 +529,7 @@ class Board:
                 else:
                     heuristic_value = heuristic_value + self.missing_case_value
 
-                current_cell = str(diagonal[4 - j])
+                current_cell = str(diagonal[3 - j])
                 if current_cell != '0':
                     if current_cell[0] == main_part[0]:
                         if current_cell[2] == main_part[2]:
@@ -551,155 +553,166 @@ class Board:
         if col[0] == col[1]:  # vertical card
             print('remove this if not required')
         else:  # horizontal card
-            verticals = np.zeros(shape=(2, 4), dtype='object')  # row 0 for part1, 1 for the part2 of the placed card
+             # row 0 for part1, 1 for the part2 of the placed card
+            #verticals = np.zeros(shape=(2, 6), dtype='object')
+            vertical = ['0', '0', '0', '0', '0', '0']
+            verticals = [vertical, vertical]
             for i in range(0, 2):
                 row_tmp = row[i]
                 col_tmp = col[i]
-                verticals[i][0] = str(self.matrix[row_tmp, col_tmp])
-                for j in range(1, 4):
+                verticals[i][0] = '0'
+                verticals[i][1] = '0'
+                verticals[i][2] = '0'
+                verticals[i][3] = str(self.matrix[row_tmp, col_tmp])
+
+                for j in range(1, 3):
                     status, error_code = Board.boundary_check(row_tmp - j, col_tmp)
                     if status:
                         card_fwd = str(self.matrix[row_tmp - j, col_tmp])
-                        verticals[i][j] = card_fwd
+                        verticals[i][3 + j] = card_fwd
 
         return verticals
 
     def vertical_heuristic_calculation(self, row, col):
 
-        heuritic_value = 0
+        heuristic_value = 0
 
         if row[0] == row[1]:  # for a horizontal card
             verticals = self.vertical_heuristic_inf(row, col)
-            for vertical in verticals:
-                main_part = str(vertical[0])
-                for j in range(1, 4):  # for a pattern below the card
-                    current_cell = str(vertical[j])
-                    if current_cell != '0':
-                        if current_cell[0] == main_part[0]:
-                            if current_cell[2] == main_part[2]:
-                                heuritic_value = heuritic_value + self.second_best_case_value
-                            else:
-                                heuritic_value = heuritic_value + self.best_case_value
-                        else:
-                            if current_cell[2] == main_part[2]:
-                                heuritic_value = heuritic_value + self.worst_case_value
-                            else:
-                                heuritic_value = heuritic_value + self.neutral_case_value
-                            break
-                    else:
-                        heuritic_value = heuritic_value + self.missing_case_value
 
-                # for a pattern above the card
-                heuritic_value = heuritic_value + 3 * self.missing_case_value
+            for vertical in verticals:
+                for i in range(0, 4):
+                    previous_cell = '0'
+                    for j in (i, i + 4):
+                        if j >= 6:
+                            break
+                        current_cell = str(vertical[j])
+                        if current_cell != '0' and previous_cell != '0':
+                            if current_cell[0] == previous_cell[0]:
+                                if current_cell[2] == previous_cell[2]:
+                                    heuristic_value = heuristic_value + self.second_best_case_value
+                                else:
+                                    heuristic_value = heuristic_value + self.best_case_value
+                            else:
+                                if current_cell[2] == previous_cell[2]:
+                                    heuristic_value = heuristic_value + self.worst_case_value
+                                else:
+                                    heuristic_value = heuristic_value + self.neutral_case_value
+                                return heuristic_value
+                        else:
+                            heuristic_value = heuristic_value + self.missing_case_value
+                            previous_cell = str(vertical[j])
 
         else:  # for a vertical card  (Ignore part 1)
-            heuritic_value = heuritic_value + 3 * self.missing_case_value  # for part2
+            heuristic_value = heuristic_value + 3 * self.missing_case_value  # for part2
 
-        return heuritic_value
+        return heuristic_value
 
     def horizontal_heuristic_inf(self, row, col):
 
+        horizontal = ['0', '0', '0', '0', '0', '0', '0', '0', '0']
         if row[0] == row[1]:  # horizontal card
             # horizontal = np.zeros(shape=(1, 8), dtype='object')
-            horizontal = ['0', '0', '0', '0', '0', '0', '0', '0', '0']
             row_tmp = row[0]
             col_tmp = col[0]
             # print('col_tmp+1:'+str(col_tmp+1))
             horizontal[4] = str(self.matrix[row_tmp, col_tmp])
             horizontal[5] = str(self.matrix[row_tmp, col_tmp + 1])
-            for i in range(1, 4):
-                status, error_code = Board.boundary_check(row_tmp, col_tmp - i)
+
+            for j in range(1, 4):
+                status, error_code = Board.boundary_check(row_tmp, col_tmp - j)
                 if status:
-                    horizontal[4 - i] = str(self.matrix[row_tmp, col_tmp - i])
-                status, error_code = Board.boundary_check(row_tmp, col_tmp + 1 + i)
+                    horizontal[4 - j] = str(self.matrix[row_tmp, col_tmp - j])
+                status, error_code = Board.boundary_check(row_tmp, col_tmp + 1 + j)
                 if status:
-                    horizontal[5 + i] = str(self.matrix[row_tmp, col_tmp + 1 + i])
+                    horizontal[5 + j] = str(self.matrix[row_tmp, col_tmp + 1 + j])
+            return horizontal
         else:  # vertical card
             # row 0 for part1 and row 1 for the part2 of the placed card
-            horizontal = np.zeros(shape=(2, 9), dtype='object')
+            #horizontals = np.zeros(shape=(2, 8), dtype='object')
+            horizontals = [horizontal, horizontal]
             for i in range(0, 2):
                 row_tmp = row[i]
                 col_tmp = col[i]
-                horizontal[i][4] = str(self.matrix[row_tmp, col_tmp])
+                horizontals[i][4] = str(self.matrix[row_tmp, col_tmp])
                 for j in range(1, 4):
                     status, error_code = Board.boundary_check(row_tmp, col_tmp + j)
                     if status:
                         card_fwd = str(self.matrix[row_tmp, col_tmp + j])
-                        horizontal[i][4 + j] = card_fwd
+                        horizontals[i][4 + j] = card_fwd
                     status, error_code = Board.boundary_check(row_tmp, col_tmp - j)
                     if status:
                         card_fwd = str(self.matrix[row_tmp, col_tmp - j])
-                        horizontal[i][4 - j] = card_fwd
-
-        return horizontal
+                        horizontals[i][4 - j] = card_fwd
+            return horizontals
 
     def horizontal_heuristic_calculation(self, row, col):
 
-        heuritic_value = 0
+        heuristic_value = 0
         horizontals = self.horizontal_heuristic_inf(row, col)
 
         if row[0] == row[1]:  # horizontal card
             main_part = str(horizontals[4])
-            for j in range(3, 1, -1):
-                current_cell = str(horizontals[j])
+            for j in range(1,4):
+                current_cell = str(horizontals[4-j])
                 if current_cell != '0':
                     if current_cell[0] == main_part[0]:
                         if current_cell[2] == main_part[2]:
-                            heuritic_value = heuritic_value + self.second_best_case_value
+                            heuristic_value = heuristic_value + self.second_best_case_value
                         else:
-                            heuritic_value = heuritic_value + self.best_case_value
+                            heuristic_value = heuristic_value + self.best_case_value
                     else:
                         if current_cell[2] == main_part[2]:
-                            heuritic_value = heuritic_value + self.worst_case_value
+                            heuristic_value = heuristic_value + self.worst_case_value
                         else:
-                            heuritic_value = heuritic_value + self.neutral_case_value
+                            heuristic_value = heuristic_value + self.neutral_case_value
                         break
                 else:
-                    heuritic_value = heuritic_value + self.missing_case_value
+                    heuristic_value = heuristic_value + self.missing_case_value
 
             main_part = str(horizontals[5])
-            for j in range(1, 3):
+            for j in range(1, 4):
                 current_cell = str(horizontals[5 + j])
                 if current_cell != '0':
                     if current_cell[0] == main_part[0]:
                         if current_cell[2] == main_part[2]:
-                            heuritic_value = heuritic_value + self.second_best_case_value
+                            heuristic_value = heuristic_value + self.second_best_case_value
                         else:
-                            heuritic_value = heuritic_value + self.best_case_value
+                            heuristic_value = heuristic_value + self.best_case_value
                     else:
                         if current_cell[2] == main_part[2]:
-                            heuritic_value = heuritic_value + self.worst_case_value
+                            heuristic_value = heuristic_value + self.worst_case_value
                         else:
-                            heuritic_value = heuritic_value + self.neutral_case_value
+                            heuristic_value = heuristic_value + self.neutral_case_value
                         break
                 else:
-                    heuritic_value = heuritic_value + self.missing_case_value
+                    heuristic_value = heuristic_value + self.missing_case_value
 
         else:  # for a vertical card
             for horizontal in horizontals:
-                main_part = str(horizontal[4])
-                for i in range(1, 8):
+                for i in range(1, 5):
+                    previous_cell = '0'
                     for j in (i, i + 4):
                         if j >= 8:
                             break
                         current_cell = str(horizontal[j])
-                        if current_cell != '0':
-                            if current_cell[0] == main_part[0]:
-                                if current_cell[2] == main_part[2]:
-                                    heuritic_value = heuritic_value + self.second_best_case_value
+                        if current_cell != '0' and previous_cell != '0':
+                            if current_cell[0] == previous_cell[0]:
+                                if current_cell[2] == previous_cell[2]:
+                                    heuristic_value = heuristic_value + self.second_best_case_value
                                 else:
-                                    heuritic_value = heuritic_value + self.best_case_value
+                                    heuristic_value = heuristic_value + self.best_case_value
                             else:
-                                if current_cell[2] == main_part[2]:
-                                    heuritic_value = heuritic_value + self.worst_case_value
-                                    # break?
+                                if current_cell[2] == previous_cell[2]:
+                                    heuristic_value = heuristic_value + self.worst_case_value
                                 else:
-                                    heuritic_value = heuritic_value + self.neutral_case_value
-                                    # break?
+                                    heuristic_value = heuristic_value + self.neutral_case_value
+                                return heuristic_value
                         else:
-                            heuritic_value = heuritic_value + self.missing_case_value
+                            heuristic_value = heuristic_value + self.missing_case_value
+                            previous_cell = str(horizontal[j])
 
-        return heuritic_value
+        return heuristic_value
 
     def calculate_heuristic_value(self, max_player_preference):
 
@@ -709,13 +722,13 @@ class Board:
         position = self.move_list[last_pos].split(':')
         row = [int(position[0]), int(position[2])]
         col = [int(position[1]), int(position[3])]
-        #print(self.move_list)
 
         diagonal_heuristic = self.diagonal_heuristic_calculation(row, col)
         horizontal_heuristic = self.horizontal_heuristic_calculation(row, col)
         vertical_heuristic = self.vertical_heuristic_calculation(row, col)
 
         heuristic_value = diagonal_heuristic + horizontal_heuristic + vertical_heuristic
+
         if max_player_preference == PreferenceType.C:
             return round(heuristic_value, 1)
         else:

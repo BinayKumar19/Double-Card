@@ -42,7 +42,7 @@ class Player:
     heuristic_eval_count = None
     current_level_heuristic_value = None
     level2_heuristic_values = None
-    minimax_level = 3
+    minimax_level = 4
 
     def __init__(self, player_name, player_type, preference_type, alpha_beta_activated):
         self.player_name = player_name
