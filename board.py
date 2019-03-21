@@ -203,6 +203,67 @@ class Board:
         return color_set, dot_set
 
     def horizontal_set_count(self, row, col):
+
+        if row[0] == row[1]:  # horizontal card
+            horizontal = ['0', '0', '0', '0', '0', '0', '0', '0']
+            row_tmp = row[0]
+            col_tmp = col[0]
+            # print('col_tmp+1:'+str(col_tmp+1))
+            horizontal[3] = str(self.matrix[row_tmp, col_tmp])
+            horizontal[4] = str(self.matrix[row_tmp, col_tmp + 1])
+
+            for j in range(1, 4):
+                if row_tmp in range(0, 12) and col_tmp - j in range(0, 8):
+                    horizontal[3 - j] = str(self.matrix[row_tmp, col_tmp - j])
+                if row_tmp in range(0, 12) and col_tmp + 1 + j in range(0, 8):
+                    horizontal[4 + j] = str(self.matrix[row_tmp, col_tmp + 1 + j])
+            horizontal_size = 8
+            horizontals = [horizontal]
+        else:  # vertical card
+            horizontal = ['0', '0', '0', '0', '0', '0', '0']
+            horizontals = [horizontal, horizontal]
+            for i in range(0, 2):
+                row_tmp = row[i]
+                col_tmp = col[i]
+                horizontals[i][3] = str(self.matrix[row_tmp, col_tmp])
+                for j in range(1, 4):
+                    if row_tmp in range(0, 12) and col_tmp + j in range(0, 8):
+                        card_fwd = str(self.matrix[row_tmp, col_tmp + j])
+                        horizontals[i][3 + j] = card_fwd
+                    if row_tmp in range(0, 12) and col_tmp - j in range(0, 8):
+                        card_fwd = str(self.matrix[row_tmp, col_tmp - j])
+                        horizontals[i][3 - j] = card_fwd
+            horizontal_size = 7
+
+        color_count = False
+        dot_count = False
+
+        for horizontal in horizontals:
+            for i in range(0, horizontal_size-3):
+                if color_count and dot_count:
+                    return color_count, dot_count
+                main_cell = horizontal[i]
+                color_count_fwd = 0
+                dot_count_fwd = 0
+                if main_cell == '0':
+                    continue
+                for j in range(i+1, i+4):
+                    current_cell = horizontal[j]
+                    if current_cell != '0':
+                        if current_cell[0] == main_cell[0]:
+                            color_count_fwd = color_count_fwd + 1
+                        if current_cell[2] == main_cell[2]:
+                            dot_count_fwd = dot_count_fwd + 1
+                    else:
+                        break
+                if color_count_fwd == 4:
+                    color_count = True
+                if dot_count_fwd == 4:
+                    dot_count = True
+
+        return color_count, dot_count
+
+    def horizontal_set_count_2(self, row, col):
         color_count_fwd = [0, 0]
         dot_count_fwd = [0, 0]
         color_count_bck = [0, 0]
@@ -217,7 +278,7 @@ class Board:
             row_tmp = row[i]
             col_tmp = col[i]
             for j in range(0, 4):
-                if  row_tmp in range(0, 12) and col_tmp + j in range(0, 8):
+                if row_tmp in range(0, 12) and col_tmp + j in range(0, 8):
                     card_fwd = str(self.matrix[row_tmp, col_tmp + j])
                     if card_fwd != '0':
                         if card_fwd[0] == previous_color_type_fwd:
@@ -232,7 +293,7 @@ class Board:
                             previous_dot_type_fwd = card_fwd[2]
                             dot_count_fwd[i] = 1
 
-                if  row_tmp in range(0, 12) and col_tmp - j in range(0, 8):
+                if row_tmp in range(0, 12) and col_tmp - j in range(0, 8):
                     card_bck = str(self.matrix[row_tmp, col_tmp - j])
                     if card_bck != '0':
                         if card_bck[0] == previous_color_type_bck:
@@ -251,25 +312,108 @@ class Board:
 
     def horizontal_set_check(self, row, col):
 
-        dot_set = False
-        color_set = False
+        color_set, dot_set = self.horizontal_set_count(row, col)
 
-        color_count_bck, dot_count_bck, color_count_fwd, dot_count_fwd = self.horizontal_set_count(row, col)
-        if (color_count_bck[0] == 4 or
-                color_count_bck[1] == 4 or
-                color_count_fwd[0] == 4 or
-                color_count_fwd[1] == 4):
-            color_set = True
-
-        if (dot_count_bck[0] == 4 or
-                dot_count_bck[1] == 4 or
-                dot_count_fwd[0] == 4 or
-                dot_count_fwd[1] == 4):
-            dot_set = True
+        # color_count_bck, dot_count_bck, color_count_fwd, dot_count_fwd = self.horizontal_set_count(row, col)
+        #
+        # if (color_count_bck[0] == 4 or
+        #         color_count_bck[1] == 4 or
+        #         color_count_fwd[0] == 4 or
+        #         color_count_fwd[1] == 4):
+        #     color_set = True
+        #
+        # if (dot_count_bck[0] == 4 or
+        #         dot_count_bck[1] == 4 or
+        #         dot_count_fwd[0] == 4 or
+        #         dot_count_fwd[1] == 4):
+        #     dot_set = True
 
         return color_set, dot_set
 
     def diagonal_set_count(self, row, col):
+
+        diagonal = ['0', '0', '0', '0', '0', '0', '0']
+        diagonals = [diagonal, diagonal, diagonal, diagonal]
+
+        for i in range(0, 2):
+            row_tmp = row[i]
+            col_tmp = col[i]
+            diagonals[i][3] = str(self.matrix[row_tmp, col_tmp])
+            diagonals[i + 2][3] = str(self.matrix[row_tmp, col_tmp])
+
+            for k in range(1, 3):
+                if row_tmp + k in range(0, 12) and col_tmp + k in range(0, 8):
+                    card_tmp = str(self.matrix[row_tmp + k, col_tmp + k])
+                    diagonals[i][3 + k] = card_tmp
+                if row_tmp - k in range(0, 12) and col_tmp - k in range(0, 8):
+                    card_tmp = str(self.matrix[row_tmp - k, col_tmp - k])
+                    diagonals[i][3 - k] = card_tmp
+                if row_tmp - k in range(0, 12) and col_tmp + k in range(0, 8):
+                    card_tmp = str(self.matrix[row_tmp - k, col_tmp + k])
+                    diagonals[i + 2][3 + k] = card_tmp
+                if row_tmp + k in range(0, 12) and col_tmp - k in range(0, 8):
+                    card_tmp = str(self.matrix[row_tmp + k, col_tmp - k])
+                    diagonals[i + 2][3 - k] = card_tmp
+
+        color_count = False
+        dot_count = False
+
+        for diagonal in diagonals:
+            # print(diagonal)
+            for i in range(0, 4):
+                if color_count and dot_count:
+                    return color_count, dot_count
+                main_cell = str(diagonal[i])
+                if main_cell == '0':
+                    continue
+                color_count_fwd = 0
+                dot_count_fwd = 0
+                for j in range(i + 1, i + 4):
+                    current_cell = str(diagonal[j])
+                    if current_cell != '0':
+                        if current_cell[0] == main_cell[0]:
+                            color_count_fwd = color_count_fwd + 1
+                        if current_cell[2] == main_cell[2]:
+                            dot_count_fwd = dot_count_fwd + 1
+                    else:
+                        break
+                if color_count_fwd == 4:
+                    color_count = True
+                if dot_count_fwd == 4:
+                    dot_count = True
+
+        return color_count, dot_count
+
+    def diagonal_set_check(self, row, col):
+
+        color_set, dot_set = self.diagonal_set_count(row, col)
+
+        # color_count_all, dot_count_all = self.diagonal_set_count(row, col)
+        #
+        # for i in range(0, 2):
+        #     color_count = color_count_all.get(i)
+        #     dot_count = dot_count_all.get(i)
+        #     color_set_tmp = False
+        #     dot_set_tmp = False
+        #
+        #     if (color_count[0] == 4 or
+        #             color_count[1] == 4 or
+        #             color_count[2] == 4 or
+        #             color_count[3] == 4):
+        #         color_set_tmp = True
+        #
+        #     if (dot_count[0] == 4 or
+        #             dot_count[1] == 4 or
+        #             dot_count[2] == 4 or
+        #             dot_count[3] == 4):
+        #         dot_set_tmp = True
+        #
+        #     color_set = color_set or color_set_tmp
+        #     dot_set = dot_set or dot_set_tmp
+
+        return color_set, dot_set
+
+    def diagonal_set_count_2(self, row, col):
 
         color_count_all = {}
         dot_count_all = {}
@@ -290,7 +434,7 @@ class Board:
             dot_count_ld = 1
 
             for k in range(1, 4):
-                if  row_c + k in range(0, 12) and col_c + k in range(0, 8):
+                if row_c + k in range(0, 12) and col_c + k in range(0, 8):
                     card_ru = str(self.matrix[row_c + k, col_c + k])
                     if card_ru != '0':
                         if card_ru[0] == new_card_square_color:
@@ -298,7 +442,7 @@ class Board:
                         if card_ru[2] == new_card_dot_color:
                             dot_count_ru = dot_count_ru + 1
 
-                if  row_c - k in range(0, 12) and col_c + k in range(0, 8):
+                if row_c - k in range(0, 12) and col_c + k in range(0, 8):
                     card_rd = str(self.matrix[row_c - k, col_c + k])
                     if card_rd != '0':
                         if card_rd[0] == new_card_square_color:
@@ -306,7 +450,7 @@ class Board:
                         if card_rd[2] == new_card_dot_color:
                             dot_count_rd = dot_count_rd + 1
 
-                if  row_c + k in range(0, 12) and col_c - k in range(0, 8):
+                if row_c + k in range(0, 12) and col_c - k in range(0, 8):
                     card_lu = str(self.matrix[row_c + k, col_c - k])
                     if card_lu != '0':
                         if card_lu[0] == new_card_square_color:
@@ -314,7 +458,7 @@ class Board:
                         if card_lu[2] == new_card_dot_color:
                             dot_count_lu = dot_count_lu + 1
 
-                if  row_c - k in range(0, 12) and col_c - k in range(0, 8):
+                if row_c - k in range(0, 12) and col_c - k in range(0, 8):
                     card_ld = str(self.matrix[row_c - k, col_c - k])
                     if card_ld != '0':
                         if card_ld[0] == new_card_square_color:
@@ -328,35 +472,6 @@ class Board:
             dot_count_all[i] = dot_count
 
         return color_count_all, dot_count_all
-
-    def diagonal_set_check(self, row, col):
-        color_set = False
-        dot_set = False
-
-        color_count_all, dot_count_all = self.diagonal_set_count(row, col)
-
-        for i in range(0, 2):
-            color_count = color_count_all.get(i)
-            dot_count = dot_count_all.get(i)
-            color_set_tmp = False
-            dot_set_tmp = False
-
-            if (color_count[0] == 4 or
-                    color_count[1] == 4 or
-                    color_count[2] == 4 or
-                    color_count[3] == 4):
-                color_set_tmp = True
-
-            if (dot_count[0] == 4 or
-                    dot_count[1] == 4 or
-                    dot_count[2] == 4 or
-                    dot_count[3] == 4):
-                dot_set_tmp = True
-
-            color_set = color_set or color_set_tmp
-            dot_set = dot_set or dot_set_tmp
-
-        return color_set, dot_set
 
     def check_winner(self):
         last_pos = len(self.move_list)
