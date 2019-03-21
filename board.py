@@ -17,10 +17,10 @@ class Board:
     total_columns = 8
     # Heuristic parameters
     best_case_value = 2
-    second_best_case_value = 0.70
-    neutral_case_value = -0.25
+    second_best_case_value = 1
+    neutral_case_value = -0.50
     worst_case_value = -1
-    missing_case_value = 0
+    missing_case_value = 0.20
     relationship = {}
 
     def __init__(self):
@@ -78,14 +78,18 @@ class Board:
     def is_new_move_valid(self, part1_row, part1_col, part2_row, part2_col):
 
         # Boundary Validation
-        status, error_code = Board.boundary_check(part1_row, part1_col)
-        if status:
-            status, error_code = Board.boundary_check(part2_row, part2_col)
-        else:
-            return status, error_code
+        if (part1_row not in range(0,12) or
+           part2_row not in range(0, 12)):
+            return False, GameError.RVE
 
+        if (part1_col not in range(0,8) or
+           part2_col not in range(0,8)):
+            return False, GameError.CVE
+
+        status = True
+        error_code = None
         # to check if there is card under the given position
-        if status and part1_row > 0:
+        if part1_row > 0:
             if part1_row == part2_row:  # horizontal card
                 if (self.matrix[part1_row - 1, part1_col] == '0' or
                         self.matrix[part2_row - 1, part2_col] == '0'):
@@ -161,9 +165,7 @@ class Board:
             col_tmp = col[i]
 
             for j in range(0, 4):
-                status, error_code = Board.boundary_check(row_tmp - j, col_tmp)
-
-                if status:
+                if  row_tmp - j in range(0, 12) and col_tmp in range(0, 8):
                     card_bck = str(self.matrix[row_tmp - j, col_tmp])
                     if card_bck != '0':
                         if card_bck[0] == previous_color_type_bck:
@@ -215,8 +217,7 @@ class Board:
             row_tmp = row[i]
             col_tmp = col[i]
             for j in range(0, 4):
-                status, error_code = Board.boundary_check(row_tmp, col_tmp + j)
-                if status:
+                if  row_tmp in range(0, 12) and col_tmp + j in range(0, 8):
                     card_fwd = str(self.matrix[row_tmp, col_tmp + j])
                     if card_fwd != '0':
                         if card_fwd[0] == previous_color_type_fwd:
@@ -231,8 +232,7 @@ class Board:
                             previous_dot_type_fwd = card_fwd[2]
                             dot_count_fwd[i] = 1
 
-                status, error_code = Board.boundary_check(row_tmp, col_tmp - j)
-                if status:
+                if  row_tmp in range(0, 12) and col_tmp - j in range(0, 8):
                     card_bck = str(self.matrix[row_tmp, col_tmp - j])
                     if card_bck != '0':
                         if card_bck[0] == previous_color_type_bck:
@@ -290,8 +290,7 @@ class Board:
             dot_count_ld = 1
 
             for k in range(1, 4):
-                status, error_code = Board.boundary_check(row_c + k, col_c + k)
-                if status:
+                if  row_c + k in range(0, 12) and col_c + k in range(0, 8):
                     card_ru = str(self.matrix[row_c + k, col_c + k])
                     if card_ru != '0':
                         if card_ru[0] == new_card_square_color:
@@ -299,8 +298,7 @@ class Board:
                         if card_ru[2] == new_card_dot_color:
                             dot_count_ru = dot_count_ru + 1
 
-                status, error_code = Board.boundary_check(row_c - k, col_c + k)
-                if status:
+                if  row_c - k in range(0, 12) and col_c + k in range(0, 8):
                     card_rd = str(self.matrix[row_c - k, col_c + k])
                     if card_rd != '0':
                         if card_rd[0] == new_card_square_color:
@@ -308,8 +306,7 @@ class Board:
                         if card_rd[2] == new_card_dot_color:
                             dot_count_rd = dot_count_rd + 1
 
-                status, error_code = Board.boundary_check(row_c + k, col_c - k)
-                if status:
+                if  row_c + k in range(0, 12) and col_c - k in range(0, 8):
                     card_lu = str(self.matrix[row_c + k, col_c - k])
                     if card_lu != '0':
                         if card_lu[0] == new_card_square_color:
@@ -317,8 +314,7 @@ class Board:
                         if card_lu[2] == new_card_dot_color:
                             dot_count_lu = dot_count_lu + 1
 
-                status, error_code = Board.boundary_check(row_c - k, col_c - k)
-                if status:
+                if  row_c - k in range(0, 12) and col_c - k in range(0, 8):
                     card_ld = str(self.matrix[row_c - k, col_c - k])
                     if card_ld != '0':
                         if card_ld[0] == new_card_square_color:
@@ -490,21 +486,16 @@ class Board:
             diagonals[i + 2][3] = str(self.matrix[row_tmp, col_tmp])
 
             for k in range(1, 3):
-                status, error_code = Board.boundary_check(row_tmp + k, col_tmp + k)
-                if status:
+                if  row_tmp + k in range(0, 12) and col_tmp + k in range(0, 8):
                     card_tmp = str(self.matrix[row_tmp + k, col_tmp + k])
                     diagonals[i][3 + k] = card_tmp
-                status, error_code = Board.boundary_check(row_tmp - k, col_tmp - k)
-                if status:
+                if  row_tmp - k in range(0, 12) and col_tmp - k in range(0, 8):
                     card_tmp = str(self.matrix[row_tmp - k, col_tmp - k])
                     diagonals[i][3 - k] = card_tmp
-
-                status, error_code = Board.boundary_check(row_tmp - k, col_tmp + k)
-                if status:
+                if  row_tmp - k in range(0, 12) and col_tmp + k in range(0, 8):
                     card_tmp = str(self.matrix[row_tmp - k, col_tmp + k])
                     diagonals[i + 2][3 + k] = card_tmp
-                status, error_code = Board.boundary_check(row_tmp + k, col_tmp - k)
-                if status:
+                if  row_tmp + k in range(0, 12) and col_tmp - k in range(0, 8):
                     card_tmp = str(self.matrix[row_tmp + k, col_tmp - k])
                     diagonals[i + 2][3 - k] = card_tmp
         return diagonals
@@ -556,8 +547,7 @@ class Board:
                 verticals[i][2] = str(self.matrix[row_tmp, col_tmp])
 
                 for j in range(1, 3):
-                    status, error_code = Board.boundary_check(row_tmp - j, col_tmp)
-                    if status:
+                    if row_tmp-j in range(0, 12) and col_tmp in range(0, 8):
                         card_fwd = str(self.matrix[row_tmp - j, col_tmp])
                         verticals[i][2 + j] = card_fwd
 
@@ -607,11 +597,9 @@ class Board:
             horizontal[4] = str(self.matrix[row_tmp, col_tmp + 1])
 
             for j in range(1, 4):
-                status, error_code = Board.boundary_check(row_tmp, col_tmp - j)
-                if status:
+                if  row_tmp in range(0, 12) and col_tmp - j in range(0, 8):
                     horizontal[3 - j] = str(self.matrix[row_tmp, col_tmp - j])
-                status, error_code = Board.boundary_check(row_tmp, col_tmp + 1 + j)
-                if status:
+                if  row_tmp in range(0, 12) and col_tmp +1 + j in range(0, 8):
                     horizontal[4 + j] = str(self.matrix[row_tmp, col_tmp + 1 + j])
             return horizontal
         else:  # vertical card
@@ -624,12 +612,10 @@ class Board:
                 col_tmp = col[i]
                 horizontals[i][3] = str(self.matrix[row_tmp, col_tmp])
                 for j in range(1, 4):
-                    status, error_code = Board.boundary_check(row_tmp, col_tmp + j)
-                    if status:
+                    if row_tmp in range(0, 12) and col_tmp + j in range(0, 8):
                         card_fwd = str(self.matrix[row_tmp, col_tmp + j])
                         horizontals[i][3 + j] = card_fwd
-                    status, error_code = Board.boundary_check(row_tmp, col_tmp - j)
-                    if status:
+                    if row_tmp in range(0, 12) and col_tmp - j in range(0, 8):
                         card_fwd = str(self.matrix[row_tmp, col_tmp - j])
                         horizontals[i][3 - j] = card_fwd
             return horizontals
@@ -783,7 +769,7 @@ class Board:
                         return True
 
         #same level
-        if row in range(1, 12):
+        if row in range(0, 12):
             # right cells
             if column + 1 in range(0, 8):
                 if str(self.matrix[row, column+1]) == '0':
@@ -820,8 +806,7 @@ class Board:
         heuristic = 0
         for i in range(1,4):
             # for diagonal up-right
-            status, error_code = self.boundary_check(main_value_row+1, main_value_column + 1)
-            if status:
+            if main_value_row+1 in range(0, 12) and main_value_column+1 in range(0, 8):
                 temp = int(matrix_temp[main_value_row+1][main_value_column + 1])
                 if temp != 0:
                     relation_value = self.relationship.get(main_value + temp)
@@ -831,14 +816,29 @@ class Board:
                     elif relation_value == self.neutral_case_value:
                         heuristic = heuristic + i * relation_value
                         break
-                    heuristic = heuristic + i*relation_value
+                    heuristic = heuristic + (i/2)*relation_value
                 else:
-                    heuristic = heuristic + self.missing_case_value
+                    heuristic = heuristic + (i/2)*self.missing_case_value
+
+        for i in range(1, 4):
+            # for diagonal up-left
+            if main_value_row+1 in range(0, 12) and main_value_column-1 in range(0, 8):
+                temp = int(matrix_temp[main_value_row + 1][main_value_column - 1])
+                if temp != 0:
+                    relation_value = self.relationship.get(main_value + temp)
+                    if relation_value == self.worst_case_value:
+                        heuristic = heuristic + i * relation_value
+                        break
+                    elif relation_value == self.neutral_case_value:
+                        heuristic = heuristic + i * relation_value
+                        break
+                    heuristic = heuristic + (i/2)*relation_value
+                else:
+                    heuristic = heuristic + (i/2)*self.missing_case_value
 
         for i in range(1, 4):
             # for diagonal down-right
-            status, error_code = self.boundary_check(main_value_row-1, main_value_column + 1)
-            if status:
+            if main_value_row-1 in range(0, 12) and main_value_column+1 in range(0, 8):
                 temp = int(matrix_temp[main_value_row - 1][main_value_column + 1])
                 if temp != 0:
                     relation_value = self.relationship.get(main_value + temp)
@@ -850,29 +850,11 @@ class Board:
                         break
                     heuristic = heuristic + i*relation_value
                 else:
-                    heuristic = heuristic + self.missing_case_value
-
-        for i in range(1, 4):
-            # for diagonal up-left
-            status, error_code = self.boundary_check(main_value_row+1, main_value_column -1)
-            if status:
-                temp = int(matrix_temp[main_value_row + 1][main_value_column - 1])
-                if temp != 0:
-                    relation_value = self.relationship.get(main_value + temp)
-                    if relation_value == self.worst_case_value:
-                        heuristic = heuristic + i * relation_value
-                        break
-                    elif relation_value == self.neutral_case_value:
-                        heuristic = heuristic + i * relation_value
-                        break
-                    heuristic = heuristic + i*relation_value
-                else:
-                    heuristic = heuristic + self.missing_case_value
+                    heuristic = heuristic + i*self.missing_case_value
 
         for i in range(1, 4):
             # for diagonal down-left
-            status, error_code = self.boundary_check(main_value_row-1, main_value_column - 1)
-            if status:
+            if main_value_row-1 in range(0, 12) and main_value_column-1 in range(0, 8):
                 temp = int(matrix_temp[main_value_row - 1][main_value_column - 1])
                 if temp != 0:
                     relation_value = self.relationship.get(main_value + temp)
@@ -884,15 +866,14 @@ class Board:
                         break
                     heuristic = heuristic + i*relation_value
                 else:
-                    heuristic = heuristic + self.missing_case_value
+                    heuristic = heuristic + i*self.missing_case_value
 
         return heuristic
 
     def cal_heuristic_horizontal(self,main_value,main_value_row, main_value_column, matrix_temp):
         heuristic = 0
         for i in range(1, 4):
-            status, error_code = self.boundary_check(main_value_row, main_value_column + 1)
-            if status:
+            if main_value_row in range(0, 12) and main_value_column+1 in range(0, 8):
                 temp = int(matrix_temp[main_value_row][main_value_column + 1])
                 if temp != 0:
                     relation_value = self.relationship.get(main_value+temp)
@@ -904,11 +885,10 @@ class Board:
                         break
                     heuristic = heuristic + i*relation_value
                 else:
-                    heuristic = heuristic + self.missing_case_value
+                    heuristic = heuristic + i*self.missing_case_value
 
         for i in range(1, 4):
-            status, error_code = self.boundary_check(main_value_row, main_value_column - 1)
-            if status:
+            if main_value_row in range(0, 12) and main_value_column-1 in range(0, 8):
                 temp = int(matrix_temp[main_value_row][main_value_column - 1])
                 if temp != 0:
                     relation_value = self.relationship.get(main_value+temp)
@@ -920,14 +900,13 @@ class Board:
                         break
                     heuristic = heuristic + i * relation_value
                 else:
-                    heuristic = heuristic + self.missing_case_value
+                    heuristic = heuristic + i*self.missing_case_value
         return heuristic
 
     def cal_heuristic_vertical(self,main_value,main_value_row, main_value_column, matrix_temp):
         heuristic = 0
         for i in range(1, 4):
-            status, error_code = self.boundary_check(main_value_row-1, main_value_column)
-            if status:
+            if main_value_row-1 in range(0, 12) and main_value_column in range(0, 8):
                 temp = int(matrix_temp[main_value_row - i][main_value_column])
                 if temp != 0:
                     relation_value = self.relationship.get(main_value+temp)
@@ -939,6 +918,6 @@ class Board:
                         break
                     heuristic = heuristic + i*relation_value
                 else:
-                    heuristic = heuristic + self.missing_case_value
+                    heuristic = heuristic + i*self.missing_case_value
 
         return heuristic
