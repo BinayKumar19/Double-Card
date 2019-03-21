@@ -16,11 +16,11 @@ class Board:
     total_rows = 12
     total_columns = 8
     # Heuristic parameters
-    best_case_value = 1
-    second_best_case_value = 0.50
+    best_case_value = 2
+    second_best_case_value = 0.70
     neutral_case_value = -0.25
     worst_case_value = -1
-    missing_case_value = 0.10
+    missing_case_value = 0
     relationship = {}
 
     def __init__(self):
@@ -759,6 +759,10 @@ class Board:
 
     def fit_for_heuristic(self, row, column):
 
+        #to ignore first row cells
+        # if row == 0 and column in range(0, 8):
+        #     return False
+
         # upper cells
         if row+1 in range(0, 12):
             #upper cell
@@ -808,6 +812,7 @@ class Board:
 
         return heuristic_diagonal + heuristic_horizontal + heuristic_vertical
 
+
     def cal_heuristic_diagonal(self, main_value, main_value_row, main_value_column, matrix_temp):
         heuristic = 0
         for i in range(1,4):
@@ -818,8 +823,14 @@ class Board:
                 if temp != 0:
                     relation_value = self.relationship.get(main_value + temp)
                     if relation_value == self.worst_case_value:
+                        heuristic = heuristic + i * relation_value
                         break
-                    heuristic = heuristic + relation_value
+                    elif relation_value == self.neutral_case_value:
+                        heuristic = heuristic + i * relation_value
+                        break
+                    heuristic = heuristic + i*relation_value
+                else:
+                    heuristic = heuristic + self.missing_case_value
 
         for i in range(1, 4):
             # for diagonal down-right
@@ -829,8 +840,14 @@ class Board:
                 if temp != 0:
                     relation_value = self.relationship.get(main_value + temp)
                     if relation_value == self.worst_case_value:
+                        heuristic = heuristic + i * relation_value
                         break
-                    heuristic = heuristic + relation_value
+                    elif relation_value == self.neutral_case_value:
+                        heuristic = heuristic + i * relation_value
+                        break
+                    heuristic = heuristic + i*relation_value
+                else:
+                    heuristic = heuristic + self.missing_case_value
 
         for i in range(1, 4):
             # for diagonal up-left
@@ -840,8 +857,14 @@ class Board:
                 if temp != 0:
                     relation_value = self.relationship.get(main_value + temp)
                     if relation_value == self.worst_case_value:
+                        heuristic = heuristic + i * relation_value
                         break
-                    heuristic = heuristic + relation_value
+                    elif relation_value == self.neutral_case_value:
+                        heuristic = heuristic + i * relation_value
+                        break
+                    heuristic = heuristic + i*relation_value
+                else:
+                    heuristic = heuristic + self.missing_case_value
 
         for i in range(1, 4):
             # for diagonal down-left
@@ -851,8 +874,14 @@ class Board:
                 if temp != 0:
                     relation_value = self.relationship.get(main_value + temp)
                     if relation_value == self.worst_case_value:
+                        heuristic = heuristic + i*relation_value
                         break
-                    heuristic = heuristic + relation_value
+                    elif relation_value == self.neutral_case_value:
+                        heuristic = heuristic + i*relation_value
+                        break
+                    heuristic = heuristic + i*relation_value
+                else:
+                    heuristic = heuristic + self.missing_case_value
 
         return heuristic
 
@@ -865,8 +894,14 @@ class Board:
                 if temp != 0:
                     relation_value = self.relationship.get(main_value+temp)
                     if relation_value == self.worst_case_value:
+                        heuristic = heuristic + i * relation_value
                         break
-                    heuristic = heuristic + relation_value
+                    elif relation_value == self.neutral_case_value:
+                        heuristic = heuristic + i * relation_value
+                        break
+                    heuristic = heuristic + i*relation_value
+                else:
+                    heuristic = heuristic + self.missing_case_value
 
         for i in range(1, 4):
             status, error_code = self.boundary_check(main_value_row, main_value_column - 1)
@@ -875,8 +910,14 @@ class Board:
                 if temp != 0:
                     relation_value = self.relationship.get(main_value+temp)
                     if relation_value == self.worst_case_value:
+                        heuristic = heuristic + i*relation_value
                         break
-                    heuristic = heuristic + relation_value
+                    elif  relation_value == self.neutral_case_value:
+                        heuristic = heuristic + i*relation_value
+                        break
+                    heuristic = heuristic + i * relation_value
+                else:
+                    heuristic = heuristic + self.missing_case_value
         return heuristic
 
     def cal_heuristic_vertical(self,main_value,main_value_row, main_value_column, matrix_temp):
@@ -888,6 +929,13 @@ class Board:
                 if temp != 0:
                     relation_value = self.relationship.get(main_value+temp)
                     if relation_value == self.worst_case_value:
+                        heuristic = heuristic + i*relation_value
                         break
-                    heuristic = heuristic + relation_value
+                    elif  relation_value == self.neutral_case_value:
+                        heuristic = heuristic + i*relation_value
+                        break
+                    heuristic = heuristic + i*relation_value
+                else:
+                    heuristic = heuristic + self.missing_case_value
+
         return heuristic
