@@ -359,7 +359,7 @@ class Board:
         dot_count = False
 
         for diagonal in diagonals:
-            print(diagonal)
+            #print(diagonal)
             for i in range(0, 4):
                 if color_count and dot_count:
                     return color_count, dot_count
@@ -378,10 +378,8 @@ class Board:
                     else:
                         break
                 if color_count_fwd == 4:
-                    print('color is 4---------------------------------------------')
                     color_count = True
                 if dot_count_fwd == 4:
-                    print('Dot is 4---------------------------------------------')
                     dot_count = True
 
         return color_count, dot_count
