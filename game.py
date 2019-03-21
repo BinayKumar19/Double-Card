@@ -96,9 +96,6 @@ class Game:
         else:
             return status, error_code
 
-    def print_board(self):
-        print(self.matrix)
-
     def _set_winner(self, color_set, dot_set):
 
         if (color_set and

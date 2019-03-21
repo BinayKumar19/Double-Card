@@ -25,8 +25,13 @@ class Board:
 
     def __init__(self):
         self.matrix = np.zeros(shape=(self.total_rows, self.total_columns), dtype='object')
+        #self.matrix = np.full((self.total_rows, self.total_columns), '0', dtype='object')
+        #self.matrix = np.empty((self.total_rows, self.total_columns))
+        self.matrix[:] = '0'
+
         self.card_list = {}
         self.move_list = {}
+
 
     def place_card(self, card, part1_row, part1_col, part2_row, part2_col, count_as_move):
 
@@ -39,8 +44,8 @@ class Board:
                 part2_col)
 
     def remove_card(self, part1_row, part1_col, part2_row, part2_col, count_as_move):
-        self.matrix[part1_row, part1_col] = 0
-        self.matrix[part2_row, part2_col] = 0
+        self.matrix[part1_row, part1_col] = '0'
+        self.matrix[part2_row, part2_col] = '0'
         card = self.card_list.pop(str(part1_row) + str(part1_col), None)
         if card is None:
             raise ValueError(GameError.ICP)
@@ -53,8 +58,8 @@ class Board:
         for i in range(11, -1, -1):
             for j in range(0, 8):
                 card_side = self.matrix[i, j]
-                if card_side == 0:
-                    print('0' + '   ', end="")
+                if card_side == '0':
+                    print(' 0  ', end="")
                 else:
                     print(str(self.matrix[i, j]) + ' ', end="")
             print()
@@ -82,18 +87,18 @@ class Board:
         # to check if there is card under the given position
         if status and part1_row > 0:
             if part1_row == part2_row:  # horizontal card
-                if (self.matrix[part1_row - 1, part1_col] == 0 or
-                        self.matrix[part2_row - 1, part2_col] == 0):
+                if (self.matrix[part1_row - 1, part1_col] == '0' or
+                        self.matrix[part2_row - 1, part2_col] == '0'):
                     status = False
                     error_code = GameError.LPE
             elif part1_col == part2_col:  # vertical card
-                if self.matrix[part1_row - 1, part1_col] == 0:
+                if self.matrix[part1_row - 1, part1_col] == '0':
                     status = False
                     error_code = GameError.LPE
 
         # To check if the position is empty
-        if status and (self.matrix[part1_row, part1_col] != 0 or
-                       self.matrix[part2_row, part2_col] != 0):
+        if status and (self.matrix[part1_row, part1_col] != '0' or
+                       self.matrix[part2_row, part2_col] != '0'):
             status = False
             error_code = GameError.NPNE
 
@@ -125,12 +130,12 @@ class Board:
 
         if prev_part1_col == prev_part2_col:  # card is vertical
             if ((prev_part2_row + 1 < self.total_rows) and
-                    self.matrix[prev_part2_row + 1][prev_part1_col] != 0):
+                    self.matrix[prev_part2_row + 1][prev_part1_col] != '0'):
                 return False, GameError.UPNE
         elif prev_part1_row == prev_part2_row:  # card is horizontal
             if (prev_part1_row + 1 < self.total_rows and
-                    (self.matrix[prev_part1_row + 1][prev_part1_col] != 0 or
-                     self.matrix[prev_part2_row + 1][prev_part2_col] != 0)):
+                    (self.matrix[prev_part1_row + 1][prev_part1_col] != '0' or
+                     self.matrix[prev_part2_row + 1][prev_part2_col] != '0')):
                 return False, GameError.UPNE
 
         if (prev_part1_row == new_part1_row and
@@ -138,8 +143,8 @@ class Board:
                 prev_part2_row == new_part2_row and
                 prev_part2_col == new_part2_col):
             return False, GameError.CCPSL
-        elif (self.matrix[prev_part1_row][prev_part1_col] == 0 or
-              self.matrix[prev_part2_row][prev_part2_col] == 0):
+        elif (self.matrix[prev_part1_row][prev_part1_col] == '0' or
+              self.matrix[prev_part2_row][prev_part2_col] == '0'):
             return False, GameError.OPE
 
         status, error_code = self.is_new_move_valid(new_part1_row, new_part1_col, new_part2_row, new_part2_col)
@@ -381,7 +386,7 @@ class Board:
         for part1_col in range(0, 8):
             part1_row = 0
             while (part1_row < 12 and
-                   self.matrix[part1_row, part1_col] != 0):
+                   self.matrix[part1_row, part1_col] != '0'):
                 part1_row = part1_row + 1
             if part1_row == 12:
                 continue
@@ -418,12 +423,12 @@ class Board:
 
             if prev_part1_col == prev_part2_col:  # card is vertical
                 if ((prev_part2_row + 1 < self.total_rows) and
-                        self.matrix[prev_part2_row + 1][prev_part1_col] != 0):
+                        self.matrix[prev_part2_row + 1][prev_part1_col] != '0'):
                     continue
             elif prev_part1_row == prev_part2_row:  # card is horizontal
                 if (prev_part1_row + 1 < self.total_rows and
-                        (self.matrix[prev_part1_row + 1][prev_part1_col] != 0 or
-                         self.matrix[prev_part2_row + 1][prev_part2_col] != 0)):
+                        (self.matrix[prev_part1_row + 1][prev_part1_col] != '0' or
+                         self.matrix[prev_part2_row + 1][prev_part2_col] != '0')):
                     continue
 
             card = self.card_list.get(str(prev_part1_row) + str(prev_part1_col), None)
@@ -431,7 +436,7 @@ class Board:
                 for new_part1_col in range(0, 8):
                     new_part1_row = 0
                     while (new_part1_row < 12 and
-                           self.matrix[new_part1_row, new_part1_col] != 0):
+                           self.matrix[new_part1_row, new_part1_col] != '0'):
                         new_part1_row = new_part1_row + 1
                     if new_part1_row == 12:
                         continue
@@ -722,7 +727,6 @@ class Board:
         self.relationship[3] = self.neutral_case_value
         self.relationship[7] = self.neutral_case_value
 
-
     def calculate_heuristic_value(self):
 
         heuristic_value = 0
@@ -744,7 +748,7 @@ class Board:
 
         for i in range(0, self.total_rows):
             for j in range(0, self.total_columns):
-                    for k in range(0, 5):
+                    for k in range(1, 5):       #ignore 0
                         if self.matrix[i, j] == self.color_set[k]:
                             matrix_temp[i][j] = k
                             if self.fit_for_heuristic(i, j):
@@ -811,7 +815,6 @@ class Board:
         heuristic_vertical = self.cal_heuristic_vertical(main_value,main_value_row, main_value_column, matrix_temp)
 
         return heuristic_diagonal + heuristic_horizontal + heuristic_vertical
-
 
     def cal_heuristic_diagonal(self, main_value, main_value_row, main_value_column, matrix_temp):
         heuristic = 0
@@ -931,7 +934,7 @@ class Board:
                     if relation_value == self.worst_case_value:
                         heuristic = heuristic + i*relation_value
                         break
-                    elif  relation_value == self.neutral_case_value:
+                    elif relation_value == self.neutral_case_value:
                         heuristic = heuristic + i*relation_value
                         break
                     heuristic = heuristic + i*relation_value

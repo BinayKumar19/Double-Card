@@ -99,7 +99,7 @@ class Player:
             possible_moves = board_current.find_possible_recycle_moves()
         else:
             possible_moves = board_current.find_possible_normal_moves(card)
-
+        optimal_move = 0
         if max_player:
             node_value_max = float("-inf")
             for key, value in possible_moves.items():
