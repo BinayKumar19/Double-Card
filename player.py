@@ -42,7 +42,7 @@ class Player:
     heuristic_eval_count = None
     current_level_heuristic_value = None
     level2_heuristic_values = None
-    minimax_level = 4
+    minimax_level = 3
 
     def __init__(self, player_name, player_type, preference_type, alpha_beta_activated):
         self.player_name = player_name
@@ -78,6 +78,7 @@ class Player:
         else:
             card = self.get_card()
 
+        new_board.set_heuristic_parameters(self.preference_type)
         self.current_level_heuristic_value, optimal_move = self._minimax(new_board, card, self.minimax_level, alpha,
                                                                          beta, True)
 
@@ -90,8 +91,8 @@ class Player:
         color_set, dot_set = board_current.check_winner()
 
         if level == 1 or color_set or dot_set:
-            self.heuristic_eval_count = self.heuristic_eval_count + 1
-            node_value_tmp = board_current.calculate_heuristic_value(self.preference_type)
+            # self.heuristic_eval_count = self.heuristic_eval_count + 1
+            node_value_tmp = board_current.calculate_heuristic_value()
             return node_value_tmp, None
 
         if Game.stage == GameStage.REC:
@@ -121,21 +122,19 @@ class Player:
 
                 node_value_tmp, optimal_move_tmp = self._minimax(board_current, card, level - 1, alpha,
                                                              beta, not max_player)
-                board_current.remove_card(part1_row, part1_col, part2_row, part2_col, True)
 
+                board_current.remove_card(part1_row, part1_col, part2_row, part2_col, True)
                 if move_type == 1:  # revert the recycle move
                     board_current.place_card(card_temp, prev_part1_row, prev_part1_col, prev_part2_row, prev_part2_col,
                                              False)
 
                 if node_value_max < node_value_tmp:
-                    #print('level:'+str(level)+' Max value:'+str(value))
                     optimal_move = value
                     node_value_max = node_value_tmp
                 if self.alpha_beta_activated:
                     alpha = max(alpha, node_value_tmp)
                     if beta <= alpha:
                         break
-            #print('before return level:' + str(level) + ' Max value:' + str(optimal_move))
             return node_value_max, optimal_move
         else:
             node_value_min = float("inf")
@@ -167,14 +166,13 @@ class Player:
                                              False)
 
                 if node_value_min > node_value_tmp:
-                    #print('level:'+str(level)+' Min value:'+str(value))
                     optimal_move = value
                     node_value_min = node_value_tmp
                 if self.alpha_beta_activated:
                     beta = min(beta, node_value_tmp)
                     if beta <= alpha:
                         break
-            if level == 2:
-                self.level2_heuristic_values.append(node_value_min)
+            # if level == 2:
+            #     self.level2_heuristic_values.append(node_value_min)
             #print('before return level:' + str(level) + ' Min value:' + str(optimal_move))
             return node_value_min, optimal_move
