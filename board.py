@@ -220,8 +220,9 @@ class Board:
             horizontal_size = 8
             horizontals = [horizontal]
         else:  # vertical card
-            horizontal = ['0', '0', '0', '0', '0', '0', '0']
-            horizontals = [horizontal, horizontal]
+            horizontals = np.zeros(shape=(2, 7), dtype='object')
+            horizontals[:] = '0'
+
             for i in range(0, 2):
                 row_tmp = row[i]
                 col_tmp = col[i]
@@ -243,8 +244,8 @@ class Board:
                 if color_count and dot_count:
                     return color_count, dot_count
                 main_cell = horizontal[i]
-                color_count_fwd = 0
-                dot_count_fwd = 0
+                color_count_fwd = 1
+                dot_count_fwd = 1
                 if main_cell == '0':
                     continue
                 for j in range(i+1, i+4):
@@ -332,16 +333,15 @@ class Board:
 
     def diagonal_set_count(self, row, col):
 
-        diagonal = ['0', '0', '0', '0', '0', '0', '0']
-        diagonals = [diagonal, diagonal, diagonal, diagonal]
+        diagonals = np.zeros(shape=(4, 7), dtype='object')
+        diagonals[:] = '0'
 
         for i in range(0, 2):
             row_tmp = row[i]
             col_tmp = col[i]
             diagonals[i][3] = str(self.matrix[row_tmp, col_tmp])
             diagonals[i + 2][3] = str(self.matrix[row_tmp, col_tmp])
-
-            for k in range(1, 3):
+            for k in range(1, 4):
                 if row_tmp + k in range(0, 12) and col_tmp + k in range(0, 8):
                     card_tmp = str(self.matrix[row_tmp + k, col_tmp + k])
                     diagonals[i][3 + k] = card_tmp
@@ -359,15 +359,15 @@ class Board:
         dot_count = False
 
         for diagonal in diagonals:
-            # print(diagonal)
+            print(diagonal)
             for i in range(0, 4):
                 if color_count and dot_count:
                     return color_count, dot_count
                 main_cell = str(diagonal[i])
                 if main_cell == '0':
                     continue
-                color_count_fwd = 0
-                dot_count_fwd = 0
+                color_count_fwd = 1
+                dot_count_fwd = 1
                 for j in range(i + 1, i + 4):
                     current_cell = str(diagonal[j])
                     if current_cell != '0':
@@ -378,8 +378,10 @@ class Board:
                     else:
                         break
                 if color_count_fwd == 4:
+                    print('color is 4---------------------------------------------')
                     color_count = True
                 if dot_count_fwd == 4:
+                    print('Dot is 4---------------------------------------------')
                     dot_count = True
 
         return color_count, dot_count
