@@ -207,12 +207,6 @@ class Game:
 
             self.board.remove_card(prev_part1_row, prev_part1_col, prev_part2_row, prev_part2_col, False)
             self.board.place_card(card, part1_row, part1_col, part2_row, part2_col, True)
-            if (self.board.matrix[part1_row, part1_col] != 0 or
-                    self.board.matrix[part2_row, part2_col] != 0):
-                    print(GameError.AIGIM.value)
-                    self.winner = self.players[1 - self.current_turn]
-                    Game.stage = GameStage.end
-                    return True, None
 
             print('card placed at ' + (chr(int(part1_col + 1) + 96)).upper() + ' ' + str(
             int(part1_row) + 1) + ' : ' + (chr(int(part2_col + 1) + 96)).upper() + ' ' + str(
