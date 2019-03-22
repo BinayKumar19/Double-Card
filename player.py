@@ -91,7 +91,7 @@ class Player:
         color_set, dot_set = board_current.check_winner()
 
         if level == 1 or color_set or dot_set:
-            # self.heuristic_eval_count = self.heuristic_eval_count + 1
+            self.heuristic_eval_count = self.heuristic_eval_count + 1
             node_value_tmp = board_current.calculate_heuristic_value()
             return node_value_tmp, None
 
@@ -172,7 +172,8 @@ class Player:
                     beta = min(beta, node_value_tmp)
                     if beta <= alpha:
                         break
-            # if level == 2:
-            #     self.level2_heuristic_values.append(node_value_min)
-            #print('before return level:' + str(level) + ' Min value:' + str(optimal_move))
+
+            if level == 2:
+                self.level2_heuristic_values.append(node_value_min)
+
             return node_value_min, optimal_move
