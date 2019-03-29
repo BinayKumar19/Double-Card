@@ -78,7 +78,8 @@ class Player:
         else:
             card = self.get_card()
 
-        new_board.set_heuristic_parameters(self.preference_type)
+        new_board.max_player_preference = self.preference_type
+        new_board.set_heuristic_parameters()
         self.current_level_heuristic_value, optimal_move = self._minimax(new_board, card, self.minimax_level, alpha,
                                                                          beta, True)
 
@@ -93,6 +94,7 @@ class Player:
         if level == 1 or color_set or dot_set:
             self.heuristic_eval_count = self.heuristic_eval_count + 1
             node_value_tmp = board_current.calculate_heuristic_value()
+            # node_value_tmp = board_current.calculate_heuristic_value_2()
             return node_value_tmp, None
 
         if Game.stage == GameStage.REC:
@@ -121,7 +123,7 @@ class Player:
                     board_current.place_card(card, part1_row, part1_col, part2_row, part2_col, True)
 
                 node_value_tmp, optimal_move_tmp = self._minimax(board_current, card, level - 1, alpha,
-                                                             beta, not max_player)
+                                                                 beta, not max_player)
 
                 board_current.remove_card(part1_row, part1_col, part2_row, part2_col, True)
                 if move_type == 1:  # revert the recycle move
@@ -157,7 +159,7 @@ class Player:
                     board_current.place_card(card, part1_row, part1_col, part2_row, part2_col, True)
 
                 node_value_tmp, optimal_move_tmp = self._minimax(board_current, card, level - 1, alpha, beta,
-                                                             not max_player)
+                                                                 not max_player)
 
                 board_current.remove_card(part1_row, part1_col, part2_row, part2_col, True)
 

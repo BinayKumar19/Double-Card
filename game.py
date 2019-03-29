@@ -7,6 +7,7 @@ Created on Sat Feb  9 14:48:07 2019
 from board import Board
 from enum import Enum
 from utilities import position_translation, GameError, PreferenceType
+import datetime
 
 
 class GameStage(Enum):
@@ -182,7 +183,13 @@ class Game:
     def play_automatic_move(self):
 
         # find an optimal move
+        start_time = datetime.datetime.now()
         move = self.players[self.current_turn].find_optimal_move(self.board)
+        end_time = datetime.datetime.now()
+        time_taken = end_time - start_time
+
+        print('Time taken(s) to generate move:' + str(time_taken.total_seconds()))
+
         move_type = move[0]
         card = move[1]
         part1_row = move[2]
@@ -209,8 +216,8 @@ class Game:
             self.board.place_card(card, part1_row, part1_col, part2_row, part2_col, True)
 
             print('card placed at ' + (chr(int(part1_col + 1) + 96)).upper() + ' ' + str(
-            int(part1_row) + 1) + ' : ' + (chr(int(part2_col + 1) + 96)).upper() + ' ' + str(
-            int(part2_row) + 1))
+                int(part1_row) + 1) + ' : ' + (chr(int(part2_col + 1) + 96)).upper() + ' ' + str(
+                int(part2_row) + 1))
 
         self.is_winner_decided()
         if len(self.board.move_list) == self.draw_move_count:
