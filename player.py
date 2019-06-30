@@ -29,19 +29,40 @@ Contents
 
 
 class Card:
-
+    """
+    Instance represent a Card Object.
+    ===========
+    Description
+    ===========
+    Represent the card which will be placed by Players on the board.
+    """
     def __init__(self):
         self.part1 = {'Color': 'N', 'Dot': 'N'}
         self.part2 = {'Color': 'N', 'Dot': 'N'}
         self.rotation = None
 
     def _set_card_side(self, side1_color, side1_dot, side2_color, side2_dot):
+        """
+        Returns:
+        ===========
+        Description
+        ===========
+        Sets the card sides.
+        """
+
         self.part1['Color'] = side1_color
         self.part1['Dot'] = side1_dot
         self.part2['Color'] = side2_color
         self.part2['Dot'] = side2_dot
 
     def rotate_card(self, rotation_value):
+        """
+        Returns:
+        ===========
+        Description
+        ===========
+        Rotate the card according to the rotation_value
+        """
         if rotation_value in ('1', '4'):
             self._set_card_side('R', 'B', 'W', 'W')
         elif rotation_value in ('2', '3'):
@@ -57,6 +78,13 @@ class Card:
 
 
 class Player:
+    """
+    Instance represent a Player Object.
+    ===========
+    Description
+    ===========
+    Represent the Players, can be Human or AI.
+    """
     heuristic_eval_count = None
     current_level_heuristic_value = None
     level2_heuristic_values = None
@@ -74,16 +102,36 @@ class Player:
             self.cards.append(card)
 
     def get_card(self):
+        """
+         Returns: Card object
+         ===========
+         Description
+         ===========
+         Return card from the card list
+         """
         return self.cards.pop()
 
     def is_card_available(self):
+        """
+        Returns: True or False
+        ===========
+        Description
+        ===========
+        Return True if cards are available with the player, otherwise False.
+        """
         if len(self.cards) > 0:
             return True
         else:
             return False
 
     def find_AI_optimal_move(self, board):
-
+        """
+        Returns: optimal move
+        ===========
+        Description
+        ===========
+        Finds optimal move for the AI player.
+        """
         # initialise
         alpha = float("-inf")
         beta = float("inf")
@@ -106,7 +154,14 @@ class Player:
         return optimal_move
 
     def _minimax_algo(self, board_current, card, level, alpha, beta, max_player):
-
+        """
+        Returns: heuristic value, optimal move
+        ===========
+        Description
+        ===========
+        Using Minimax algorithm, finds the heuristic value and the optimal mode,
+        If alpha_beta_activated is True, Alpha Beta pruning is activated.
+        """
         color_set, dot_set = board_current.check_winner()
 
         if level == 1 or color_set or dot_set:

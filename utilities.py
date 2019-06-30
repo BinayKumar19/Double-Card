@@ -21,6 +21,13 @@ Contents
 
 
 class FileWriter:
+    """
+    Instance represent a FileWriter Object.
+    ===========
+    Description
+    ===========
+    contains logic to open and write to the trace file.
+    """
     print_trace_file = False
     file_name = 'trace_file'
 

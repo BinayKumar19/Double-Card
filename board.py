@@ -15,36 +15,43 @@ Board
 ==========
 This module contains a Board class that represent the game board and contain methods to perform addition 
 and removal of the card, It also contain methods to perform validation and heuristic calculation for the current board
-state
+state.
 
 Contents
 --------
-* Board     - Board class that represent the board on which game will be played
-* place_card()   - Places a card on the board
-* remove_card()   - Removes a card from the board
-* print_board() - Displays the board state
-* is_regular_move_valid() - Checks if the new normal move is valid or not
-* is_recycle_move_valid() - Checks if the new recycle move is valid or not
-* vertical_set_check() - Checks for a vertical pattern
-* horizontal_set_check() - Checks for a horizontal pattern
-* diagonal_set_check() - Checks for a diagonal pattern
+* Board     - Board class that represent the board on which game will be played.
+* place_card()   - Places a card on the board.
+* remove_card()   - Removes a card from the board.
+* print_board() - Displays the board state.
+* is_regular_move_valid() - Checks if the new normal move is valid or not.
+* is_recycle_move_valid() - Checks if the new recycle move is valid or not.
+* vertical_set_check() - Checks for a vertical pattern.
+* horizontal_set_check() - Checks for a horizontal pattern.
+* diagonal_set_check() - Checks for a diagonal pattern.
 * check_winner() - Checks if a winner is decided in the current game state, It calls vertical_set_check(),
-                    horizontal_set_check() and diagonal_set_check()
-* find_possible_regular_moves() - Find all possible normal moves for AI
-* find_possible_recycle_moves() - Find all possible recycle moves for AI
-* set_heuristic_parameters() - Sets heuristic parameters for the heuristic calculations
-* calculate_heuristic_value() - Calculates the heuristic value for the current board state, calls cal_new_heuristic()
-* fit_for_heuristic() - checks if a given position should be considered for heuristic calculation
+                    horizontal_set_check() and diagonal_set_check().
+* find_possible_regular_moves() - Find all possible normal moves for AI.
+* find_possible_recycle_moves() - Find all possible recycle moves for AI.
+* set_heuristic_parameters() - Sets heuristic parameters for the heuristic calculations.
+* calculate_heuristic_value() - Calculates the heuristic value for the current board state, calls cal_new_heuristic().
+* fit_for_heuristic() - checks if a given position should be considered for heuristic calculation.
 * cal_new_heuristic() - Calculations for the heuristic values returned by cal_heuristic_diagonal(), 
-                        cal_heuristic_vertical() and cal_heuristic_horizontal()
-* cal_heuristic_diagonal() - Calculates the heuristic value for a diagonal pattern
-* cal_heuristic_vertical() - Calculates the heuristic value for a vertical pattern
-* cal_heuristic_horizontal() - Calculates the heuristic value for a horizontal pattern
+                        cal_heuristic_vertical() and cal_heuristic_horizontal().
+* cal_heuristic_diagonal() - Calculates the heuristic value for a diagonal pattern.
+* cal_heuristic_vertical() - Calculates the heuristic value for a vertical pattern.
+* cal_heuristic_horizontal() - Calculates the heuristic value for a horizontal pattern.
 
 """
 
 
 class Board:
+    """
+    Instance represent a Board Object.
+    ===========
+    Description
+    ===========
+    Represent the board on which game will be played.
+    """
     total_rows = 12
     total_columns = 8
 

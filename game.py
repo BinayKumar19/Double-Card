@@ -18,17 +18,17 @@ the game.
 
 Contents
 --------
-* Game     - Board class that represent the board on which game will be played
+* Game     - Game class that represent the game which will be played.
 * GameStage - An enumeration to represent the stage of the game i.e. Regular, Recycle or End.
-* add_player() - Add player to the game
-* change_player_turn() - Change player's turn
-* play_regular_move() - Play regular move on the board
-* play_recycle_move() - Play recycle move on the board
-* _set_winner() - Set a winner for the game
-* print_result() - print result of the game
-* display_board() - display the board
-* play_manual_move() - play manual move for the human player
-* play_automatic_move() - play automatic move for the AI
+* add_player() - Add player to the game.
+* change_player_turn() - Change player's turn.
+* play_regular_move() - Play regular move on the board.
+* play_recycle_move() - Play recycle move on the board.
+* _set_winner() - Set a winner for the game.
+* print_result() - print result of the game.
+* display_board() - display the board.
+* play_manual_move() - play manual move for the human player.
+* play_automatic_move() - play automatic move for the AI.
 
 """
 
@@ -40,6 +40,13 @@ class GameStage(Enum):
 
 
 class Game:
+    """
+    Instance represent a Game Object.
+    ===========
+    Description
+    ===========
+    Represent the game which will be played.
+    """
     stage = None
     draw_move_count = 40
 
@@ -52,15 +59,36 @@ class Game:
         Game.stage = GameStage.REG
 
     def add_player(self, player):
+        """
+        Returns:
+        ===========
+        Description
+        ===========
+        Receives a player as a parameter and add it to the game.
+        """
         self.players.append(player)
 
     def change_player_turn(self):
+        """
+        Returns:
+        ===========
+        Description
+        ===========
+        Changes the player turn.
+        """
         if self.current_turn == 0:
             self.current_turn = 1
         else:
             self.current_turn = 0
 
     def _card_part2_position(self, card_rotation, row, column):
+        """
+        Returns: row and column value for the second half part of the card
+        ===========
+        Description
+        ===========
+        Finds the position for the second half part of the card through rotation value.
+        """
         if card_rotation in ('1', '3', '5', '7'):
             part2_col = column + 1
             part2_row = row
@@ -72,7 +100,14 @@ class Game:
         return part2_row, part2_col
 
     def play_regular_move(self, card_rotation, card_part1_row, card_part1_col):
-
+        """
+        Returns: status and error code
+        ===========
+        Description
+        ===========
+        After validating the regular move, plays it by calling board.place_card(),
+        If validation fails, returns False and the error code.
+        """
         if self.players[self.current_turn].is_card_available():
             card_part2_row, card_part2_col = self._card_part2_position(card_rotation, card_part1_row,
                                                                        card_part1_col)
@@ -98,6 +133,15 @@ class Game:
 
     def play_recycle_move(self, prev_part1_row, prev_part1_col, prev_part2_row,
                           prev_part2_col, card_angle, new_part1_row, new_part1_col):
+        """
+        Returns: status and error code
+        ===========
+        Description
+        ===========
+        After validating the recycle move, removes the card from the old position via board.remove_card() adn then
+        plays it by calling board.place_card(),
+        If validation fails, returns False and the error code.
+        """
 
         new_part2_row, new_part2_col = self._card_part2_position(card_angle, new_part1_row, new_part1_col)
 
@@ -121,7 +165,13 @@ class Game:
             return status, error_code
 
     def _set_winner(self, color_set, dot_set):
-
+        """
+        Returns: True and False
+        ===========
+        Description
+        ===========
+        Returns True if color or Dot set is preset, otherwise False
+        """
         if (color_set and
                 self.players[self.current_turn].preference_type == PreferenceType.C):
             self.winner = self.players[self.current_turn]
@@ -140,6 +190,13 @@ class Game:
         return True
 
     def is_winner_decided(self):
+        """
+        Returns: True and False
+        ===========
+        Description
+        ===========
+        Returns True if a winner is decided, otherwise False
+        """
         status = False
         move_count = len(self.board.move_list)
 
@@ -153,15 +210,36 @@ class Game:
         return status
 
     def print_result(self):
+        """
+        Returns:
+        ===========
+        Description
+        ===========
+        Prints the game result
+        """
         if self.winner == 'N':
             print('Draw')
         else:
             print('Winner is ' + self.winner.player_name + '(' + str(self.winner.preference_type.value) + ')')
 
     def display_board(self):
+        """
+        Returns:
+        ===========
+        Description
+        ===========
+        Displays the current state of the board
+        """
         self.board.print_board()
 
     def play_manual_move(self, move):
+        """
+        Returns: status, error code
+        ===========
+        Description
+        ===========
+        returns True if manual move is done successfully, otherwise False, error code
+        """
         input_move = move.split(" ")
         input_first = input_move[0]
         try:
@@ -204,6 +282,13 @@ class Game:
         return status, error_code
 
     def play_automatic_move(self):
+        """
+        Returns: status, error code
+        ===========
+        Description
+        ===========
+        returns True if automatic move is done successfully.
+        """
 
         # find an optimal move
         start_time = datetime.datetime.now()
