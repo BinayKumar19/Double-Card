@@ -5,16 +5,49 @@ Created on Tue Jan 22 15:06:03 2019
 @author: binay
 """
 
-# AI Game
-from enum import Enum
 import numpy as np
 import copy
 from utilities import GameError, PreferenceType
+
+"""
+==========
+Board
+==========
+This module contains a Board class that represent the game board and contain methods to perform addition 
+and removal of the card, It also contain methods to perform validation and heuristic calculation for the current board
+state
+
+Contents
+--------
+* Board     - Board class that represent the board on which game will be played
+* place_card()   - Places a card on the board
+* remove_card()   - Removes a card from the board
+* print_board() - Displays the board state
+* is_regular_move_valid() - Checks if the new normal move is valid or not
+* is_recycle_move_valid() - Checks if the new recycle move is valid or not
+* vertical_set_check() - Checks for a vertical pattern
+* horizontal_set_check() - Checks for a horizontal pattern
+* diagonal_set_check() - Checks for a diagonal pattern
+* check_winner() - Checks if a winner is decided in the current game state, It calls vertical_set_check(),
+                    horizontal_set_check() and diagonal_set_check()
+* find_possible_regular_moves() - Find all possible normal moves for AI
+* find_possible_recycle_moves() - Find all possible recycle moves for AI
+* set_heuristic_parameters() - Sets heuristic parameters for the heuristic calculations
+* calculate_heuristic_value() - Calculates the heuristic value for the current board state, calls cal_new_heuristic()
+* fit_for_heuristic() - checks if a given position should be considered for heuristic calculation
+* cal_new_heuristic() - Calculations for the heuristic values returned by cal_heuristic_diagonal(), 
+                        cal_heuristic_vertical() and cal_heuristic_horizontal()
+* cal_heuristic_diagonal() - Calculates the heuristic value for a diagonal pattern
+* cal_heuristic_vertical() - Calculates the heuristic value for a vertical pattern
+* cal_heuristic_horizontal() - Calculates the heuristic value for a horizontal pattern
+
+"""
 
 
 class Board:
     total_rows = 12
     total_columns = 8
+
     # Heuristic parameters
     best_case_value = 2
     second_best_case_value = 1
@@ -26,14 +59,19 @@ class Board:
 
     def __init__(self):
         self.matrix = np.zeros(shape=(self.total_rows, self.total_columns), dtype='object')
-        # self.matrix = np.full((self.total_rows, self.total_columns), '0', dtype='object')
-        # self.matrix = np.empty((self.total_rows, self.total_columns))
         self.matrix[:] = '0'
 
         self.card_list = {}
         self.move_list = {}
 
     def place_card(self, card, part1_row, part1_col, part2_row, part2_col, count_as_move):
+        """
+        Returns:
+        ===========
+        Description
+        ===========
+        Places the given card at the given location, adds it to the card_list and saves the move.
+        """
 
         self.matrix[part1_row, part1_col] = card.part1['Color'] + ':' + card.part1['Dot']
         self.matrix[part2_row, part2_col] = card.part2['Color'] + ':' + card.part2['Dot']
@@ -44,6 +82,13 @@ class Board:
                 part2_col)
 
     def remove_card(self, part1_row, part1_col, part2_row, part2_col, count_as_move):
+        """
+        Returns: The removed card.
+        ===========
+        Description
+        ===========
+        Removes the card from the board and returns it.
+        """
         self.matrix[part1_row, part1_col] = '0'
         self.matrix[part2_row, part2_col] = '0'
         card = self.card_list.pop(str(part1_row) + str(part1_col), None)
@@ -55,6 +100,13 @@ class Board:
         return card
 
     def print_board(self):
+        """
+        Returns:
+        ===========
+        Description
+        ===========
+        Displays the board.
+        """
         for i in range(11, -1, -1):
             for j in range(0, 8):
                 card_side = self.matrix[i, j]
@@ -64,8 +116,15 @@ class Board:
                     print(str(self.matrix[i, j]) + ' ', end="")
             print()
 
-    def is_new_move_valid(self, part1_row, part1_col, part2_row, part2_col):
-
+    def is_regular_move_valid(self, part1_row, part1_col, part2_row, part2_col):
+        """
+        Returns: status, error code
+        ===========
+        Description
+        ===========
+        If new move is invalid, returns False and the error code.
+        If new move is valid, returns True and None for the the error code.
+        """
         # Boundary Validation
         if (part1_row not in range(0, 12) or
                 part2_row not in range(0, 12)):
@@ -99,7 +158,14 @@ class Board:
 
     def is_recycle_move_valid(self, new_part1_row, new_part1_col, new_part2_row, new_part2_col, prev_part1_row,
                               prev_part1_col, prev_part2_row, prev_part2_col):
-
+        """
+        Returns: status, error code
+        ===========
+        Description
+        ===========
+        If new recycle move is invalid, returns False and the error code.
+        If new recycle move is valid, returns True and None for the the error code.
+        """
         if len(self.card_list) < 24:
             return False, GameError.CSLCPRN
 
@@ -140,10 +206,21 @@ class Board:
               self.matrix[prev_part2_row][prev_part2_col] == '0'):
             return False, GameError.OPE
 
-        status, error_code = self.is_new_move_valid(new_part1_row, new_part1_col, new_part2_row, new_part2_col)
+        status, error_code = self.is_regular_move_valid(new_part1_row, new_part1_col, new_part2_row, new_part2_col)
         return status, error_code
 
-    def vertical_set_count(self, row, col):
+    def vertical_set_check(self, row, col):
+        """
+         Returns: color set, Dot set
+         ===========
+         Description
+         ===========
+         If 4 consecutive color are present as a vertical pattern, color_set is returned True, False otherwise.
+         If 4 consecutive Dot are present as a vertical pattern, dot_set is returned True, False otherwise.
+        """
+        color_set = False
+        dot_set = False
+
         color_count_bck = [0, 0]
         dot_count_bck = [0, 0]
 
@@ -169,13 +246,6 @@ class Board:
                             previous_dot_type_bck = card_bck[2]
                             dot_count_bck[i] = 1
 
-        return color_count_bck, dot_count_bck
-
-    def vertical_set_check(self, row, col):
-        color_set = False
-        dot_set = False
-
-        color_count_bck, dot_count_bck = self.vertical_set_count(row, col)
         if (color_count_bck[0] == 4 or
                 color_count_bck[1] == 4):
             color_set = True
@@ -191,13 +261,19 @@ class Board:
 
         return color_set, dot_set
 
-    def horizontal_set_count(self, row, col):
-
+    def horizontal_set_check(self, row, col):
+        """
+        Returns: color set, Dot set
+        ===========
+        Description
+        ===========
+        If 4 consecutive color are present as a horizontal pattern, color_set is returned True, False otherwise.
+        If 4 consecutive Dot are present as a horizontal pattern, dot_set is returned True, False otherwise.
+        """
         if row[0] == row[1]:  # horizontal card
             horizontal = ['0', '0', '0', '0', '0', '0', '0', '0']
             row_tmp = row[0]
             col_tmp = col[0]
-            # print('col_tmp+1:'+str(col_tmp+1))
             horizontal[3] = str(self.matrix[row_tmp, col_tmp])
             horizontal[4] = str(self.matrix[row_tmp, col_tmp + 1])
 
@@ -253,27 +329,15 @@ class Board:
 
         return color_count, dot_count
 
-    def horizontal_set_check(self, row, col):
-
-        color_set, dot_set = self.horizontal_set_count(row, col)
-
-        # color_count_bck, dot_count_bck, color_count_fwd, dot_count_fwd = self.horizontal_set_count(row, col)
-        #
-        # if (color_count_bck[0] == 4 or
-        #         color_count_bck[1] == 4 or
-        #         color_count_fwd[0] == 4 or
-        #         color_count_fwd[1] == 4):
-        #     color_set = True
-        #
-        # if (dot_count_bck[0] == 4 or
-        #         dot_count_bck[1] == 4 or
-        #         dot_count_fwd[0] == 4 or
-        #         dot_count_fwd[1] == 4):
-        #     dot_set = True
-
-        return color_set, dot_set
-
-    def diagonal_set_count(self, row, col):
+    def diagonal_set_check(self, row, col):
+        """
+        Returns: color set, Dot set
+        ===========
+        Description
+        ===========
+        If 4 consecutive color are present as a diagonal pattern, color_set is returned True, False otherwise.
+        If 4 consecutive Dot are present as a diagonal pattern, dot_set is returned True, False otherwise.
+        """
 
         diagonals = np.zeros(shape=(4, 7), dtype='object')
         diagonals[:] = '0'
@@ -326,36 +390,18 @@ class Board:
 
         return color_count, dot_count
 
-    def diagonal_set_check(self, row, col):
-
-        color_set, dot_set = self.diagonal_set_count(row, col)
-
-        # color_count_all, dot_count_all = self.diagonal_set_count(row, col)
-        #
-        # for i in range(0, 2):
-        #     color_count = color_count_all.get(i)
-        #     dot_count = dot_count_all.get(i)
-        #     color_set_tmp = False
-        #     dot_set_tmp = False
-        #
-        #     if (color_count[0] == 4 or
-        #             color_count[1] == 4 or
-        #             color_count[2] == 4 or
-        #             color_count[3] == 4):
-        #         color_set_tmp = True
-        #
-        #     if (dot_count[0] == 4 or
-        #             dot_count[1] == 4 or
-        #             dot_count[2] == 4 or
-        #             dot_count[3] == 4):
-        #         dot_set_tmp = True
-        #
-        #     color_set = color_set or color_set_tmp
-        #     dot_set = dot_set or dot_set_tmp
-
-        return color_set, dot_set
-
     def check_winner(self):
+        """
+        Returns: color set, Dot set
+        ===========
+        Description
+        ===========
+        If 4 consecutive color are present either as a diagonal, horizontal or vertical pattern, color_set is returned
+        True, False otherwise.
+        If 4 consecutive dots are present either as a diagonal, horizontal or vertical pattern, dot_set is returned
+        True, False otherwise.
+        """
+
         last_pos = len(self.move_list)
         if last_pos == 0:
             return False, False
@@ -373,7 +419,14 @@ class Board:
 
         return color_set, dot_set
 
-    def find_possible_normal_moves(self, card):
+    def find_possible_regular_moves(self, card):
+        """
+        Returns: a dictionary possible_moves
+        ===========
+        Description
+        ===========
+        returns all possible normal moves for the current board state.
+        """
         move_count = 1
         possible_moves = {}
         for part1_col in range(0, 8):
@@ -395,7 +448,7 @@ class Board:
                     part2_col = part1_col
 
                 # check if move is valid or not
-                status, error_code = self.is_new_move_valid(part1_row, part1_col, part2_row, part2_col)
+                status, error_code = self.is_regular_move_valid(part1_row, part1_col, part2_row, part2_col)
                 if status:
                     #  print(part1_row, part1_col, part2_row, part2_col)
                     move = (0, card_tmp, part1_row, part1_col, part2_row, part2_col)
@@ -404,6 +457,13 @@ class Board:
         return possible_moves
 
     def find_possible_recycle_moves(self):
+        """
+        Returns: a dictionary possible_moves
+        ===========
+        Description
+        ===========
+        returns all possible recycle moves for the current board state.
+        """
         move_count = 1
         possible_moves = {}
 
@@ -470,6 +530,13 @@ class Board:
         return possible_moves
 
     def set_heuristic_parameters(self):
+        """
+        Returns:
+        ===========
+        Description
+        ===========
+        Sets the heuristic parameters required for the heuristic calculations.
+        """
         self.relationship = {}
 
         if self.max_player_preference == PreferenceType.C:
@@ -491,63 +558,16 @@ class Board:
         self.relationship[3] = self.neutral_case_value
         self.relationship[7] = self.neutral_case_value
 
-    def calculate_heuristic_value_2(self):
-
-        last_pos = len(self.move_list)
-        position = self.move_list[last_pos].split(':')
-        rows = [int(position[0]), int(position[2])]
-        cols = [int(position[1]), int(position[3])]
-
-        if self.max_player_preference == PreferenceType.C:
-            main_cell_index = 0
-        else:
-            main_cell_index = 2
-
-        pattern_count = 0
-
-        for i in (0, 1):
-            row = rows[i]
-            col = cols[i]
-            main_cell_value = self.matrix[row, col][main_cell_index]
-
-            for j in range(0, 4):
-                # vertical
-                if row - j in range(0, 12) and self.matrix[row - j, col] != '0':
-                    if main_cell_value == self.matrix[row - j, col][main_cell_index]:
-                        pattern_count = pattern_count + 1
-
-                # horizontal
-                if col + j in range(0, 8) and self.matrix[row, col + j] != '0':
-                    if main_cell_value == self.matrix[row, col + j][main_cell_index]:
-                        pattern_count = pattern_count + 1
-                if col - j in range(0, 8) and self.matrix[row, col - j] != '0':
-                    if main_cell_value == self.matrix[row, col - j][main_cell_index]:
-                        pattern_count = pattern_count + 1
-
-                # diagonal
-                if (row + j in range(0, 12) and col + j in range(0, 8) and
-                        self.matrix[row + j, col + j] != '0'):
-                    if main_cell_value == self.matrix[row + j, col + j][main_cell_index]:
-                        pattern_count = pattern_count + 1
-                # for diagonal up-left
-                if (row + j in range(0, 12) and col - j in range(0, 8) and
-                        self.matrix[row + j, col - j] != '0'):
-                    if main_cell_value == self.matrix[row + j, col - j][main_cell_index]:
-                        pattern_count = pattern_count + 1
-                # for diagonal down-right
-                if (row - j in range(0, 12) and col + j in range(0, 8) and
-                        self.matrix[row - j, col + j] != '0'):
-                    if main_cell_value == self.matrix[row - j, col + j][main_cell_index]:
-                        pattern_count = pattern_count + 1
-                if (row - j in range(0, 12) and col - j in range(0, 8) and
-                        self.matrix[row - j, col - j] != '0'):
-                    if main_cell_value == self.matrix[row - j, col - j][main_cell_index]:
-                        pattern_count = pattern_count + 1
-
-        return pattern_count
-
     def calculate_heuristic_value(self):
-
+        """
+        Returns: heuristic value
+        ===========
+        Description
+        ===========
+        creates a temporary board and saves all positions which are suitable for heuristic calculations using
+        fit_for_heuristic(),
+        calls cal_new_heuristic() on all saved positions.
+        """
         heuristic_value = 0
 
         matrix_temp = np.zeros(shape=(self.total_rows, self.total_columns))
@@ -570,7 +590,14 @@ class Board:
         return round(heuristic_value, 1)
 
     def fit_for_heuristic(self, row, column):
-
+        """
+        Returns: True/False
+        ===========
+        Description
+        ===========
+        returns True, if the position affects the possibility of a future pattern.
+        returns False, if the position doesn't affect the possibility of a future pattern.
+        """
         # upper cells
         if row + 1 in range(0, 12):
             # upper cell
@@ -611,7 +638,14 @@ class Board:
         return False
 
     def cal_new_heuristic(self, main_value_row, main_value_column, matrix_temp):
-
+        """
+        Returns: Calculated Heuristic value for the given position
+        ===========
+        Description
+        ===========
+        calls cal_heuristic_diagonal, cal_heuristic_horizontal and cal_heuristic_vertical, and returns the sum as
+        heuristic value for the given position.
+        """
         main_value = int(matrix_temp[main_value_row][main_value_column])
 
         heuristic_diagonal = self.cal_heuristic_diagonal(main_value, main_value_row, main_value_column, matrix_temp)
@@ -621,6 +655,13 @@ class Board:
         return heuristic_diagonal + heuristic_horizontal + heuristic_vertical
 
     def cal_heuristic_diagonal(self, main_cell_value, main_value_row, main_value_column, matrix_temp):
+        """
+        Returns: Calculated Heuristic value for the given position
+        ===========
+        Description
+        ===========
+        calculates the heuristic value for a diagonal pattern
+        """
         heuristic = 0
         for i in range(1, 4):
             # for diagonal up-right
@@ -688,6 +729,13 @@ class Board:
         return heuristic
 
     def cal_heuristic_horizontal(self, main_value, main_value_row, main_value_column, matrix_temp):
+        """
+        Returns: Calculated Heuristic value for the given position
+        ===========
+        Description
+        ===========
+        calculates the heuristic value for a horizontal pattern
+        """
         heuristic = 0
         for i in range(1, 4):
             if main_value_row in range(0, 12) and main_value_column + i in range(0, 8):
@@ -721,6 +769,13 @@ class Board:
         return heuristic
 
     def cal_heuristic_vertical(self, main_value, main_value_row, main_value_column, matrix_temp):
+        """
+        Returns: Calculated Heuristic value for the given position
+        ===========
+        Description
+        ===========
+        calculates the heuristic value for a vertical pattern
+        """
         heuristic = 0
         for i in range(1, 4):
             if main_value_row - i in range(0, 12) and main_value_column in range(0, 8):

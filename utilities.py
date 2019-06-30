@@ -1,6 +1,25 @@
 from enum import Enum
 
 
+"""
+==========
+utilities
+==========
+This module contains classes and functions required for the non-functional work.
+
+Contents
+--------
+* FileWriter - A class to open and write to the trace file.
+* GameError - An enumeration class stating all possible game errors.
+* PlayerType - An enumeration class stating player type.
+* PreferenceType - An enumeration class stating player preference type.
+* open_file_writer() - A static method to open the FileWriter for the trace file.
+* write_to_trace_file() - A static method to write to the trace file.
+* position_translation() - Function to translate the card position value to Python specific value.
+
+"""
+
+
 class FileWriter:
     print_trace_file = False
     file_name = 'trace_file'
@@ -40,6 +59,7 @@ class GameError(Enum):
     ICP = 'Invalid card position'
     AIGIM = 'AI generated Invalid move'
 
+
 def position_translation(row, column):
     if column.isnumeric():
         raise ValueError('Column value should be an alphabet')
@@ -50,6 +70,7 @@ def position_translation(row, column):
     column = int(column) - 1
     row = int(row) - 1
     return row, column
+
 
 class PlayerType(Enum):
     H = 'Human'

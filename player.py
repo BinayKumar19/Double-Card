@@ -4,10 +4,28 @@ Created on Sat Feb  9 14:18:38 2019
 
 @author: binay
 """
-from enum import Enum
 from utilities import FileWriter, GameError
 import copy
 from game import Game, GameStage
+
+"""
+==========
+player
+==========
+This module contains a Card class and a Player class to implement the logic required at the player's end.
+
+Contents
+--------
+* Card - A class representing the card.
+* Player - A class representing the player playing the game, contains card assigned to the player.
+* _set_card_side() - To set the card on a particular side.
+* rotate_card() - To rotate the card.
+* get_card() - returns card from the player.
+* is_card_available() - Checks if the player has a card or not.
+* find_AI_optimal_move() - Finds optimal move for the AI using Minimax/Alpha-Beta Algorithm.
+* _minimax_algo() - Minimax Algorithm logic.
+
+"""
 
 
 class Card:
@@ -17,7 +35,7 @@ class Card:
         self.part2 = {'Color': 'N', 'Dot': 'N'}
         self.rotation = None
 
-    def _set_side(self, side1_color, side1_dot, side2_color, side2_dot):
+    def _set_card_side(self, side1_color, side1_dot, side2_color, side2_dot):
         self.part1['Color'] = side1_color
         self.part1['Dot'] = side1_dot
         self.part2['Color'] = side2_color
@@ -25,13 +43,13 @@ class Card:
 
     def rotate_card(self, rotation_value):
         if rotation_value in ('1', '4'):
-            self._set_side('R', 'B', 'W', 'W')
+            self._set_card_side('R', 'B', 'W', 'W')
         elif rotation_value in ('2', '3'):
-            self._set_side('W', 'W', 'R', 'B')
+            self._set_card_side('W', 'W', 'R', 'B')
         elif rotation_value in ('5', '8'):
-            self._set_side('R', 'W', 'W', 'B')
+            self._set_card_side('R', 'W', 'W', 'B')
         elif rotation_value in ('6', '7'):
-            self._set_side('W', 'B', 'R', 'W')
+            self._set_card_side('W', 'B', 'R', 'W')
         else:
             raise ValueError(GameError.IRV.value)
 
@@ -58,13 +76,13 @@ class Player:
     def get_card(self):
         return self.cards.pop()
 
-    def card_available(self):
+    def is_card_available(self):
         if len(self.cards) > 0:
             return True
         else:
             return False
 
-    def find_optimal_move(self, board):
+    def find_AI_optimal_move(self, board):
 
         # initialise
         alpha = float("-inf")
@@ -80,27 +98,26 @@ class Player:
 
         new_board.max_player_preference = self.preference_type
         new_board.set_heuristic_parameters()
-        self.current_level_heuristic_value, optimal_move = self._minimax(new_board, card, self.minimax_level, alpha,
-                                                                         beta, True)
+        self.current_level_heuristic_value, optimal_move = self._minimax_algo(new_board, card, self.minimax_level, alpha,
+                                                                              beta, True)
 
         FileWriter.write_to_trace_file(self.heuristic_eval_count, self.current_level_heuristic_value,
                                        self.level2_heuristic_values)
         return optimal_move
 
-    def _minimax(self, board_current, card, level, alpha, beta, max_player):
+    def _minimax_algo(self, board_current, card, level, alpha, beta, max_player):
 
         color_set, dot_set = board_current.check_winner()
 
         if level == 1 or color_set or dot_set:
             self.heuristic_eval_count = self.heuristic_eval_count + 1
             node_value_tmp = board_current.calculate_heuristic_value()
-            # node_value_tmp = board_current.calculate_heuristic_value_2()
             return node_value_tmp, None
 
         if Game.stage == GameStage.REC:
             possible_moves = board_current.find_possible_recycle_moves()
         else:
-            possible_moves = board_current.find_possible_normal_moves(card)
+            possible_moves = board_current.find_possible_regular_moves(card)
         optimal_move = 0
         if max_player:
             node_value_max = float("-inf")
@@ -122,8 +139,8 @@ class Player:
                                                           prev_part2_col, False)
                     board_current.place_card(card, part1_row, part1_col, part2_row, part2_col, True)
 
-                node_value_tmp, optimal_move_tmp = self._minimax(board_current, card, level - 1, alpha,
-                                                                 beta, not max_player)
+                node_value_tmp, optimal_move_tmp = self._minimax_algo(board_current, card, level - 1, alpha,
+                                                                      beta, not max_player)
 
                 board_current.remove_card(part1_row, part1_col, part2_row, part2_col, True)
                 if move_type == 1:  # revert the recycle move
@@ -158,8 +175,8 @@ class Player:
                                                           prev_part2_col, False)
                     board_current.place_card(card, part1_row, part1_col, part2_row, part2_col, True)
 
-                node_value_tmp, optimal_move_tmp = self._minimax(board_current, card, level - 1, alpha, beta,
-                                                                 not max_player)
+                node_value_tmp, optimal_move_tmp = self._minimax_algo(board_current, card, level - 1, alpha, beta,
+                                                                      not max_player)
 
                 board_current.remove_card(part1_row, part1_col, part2_row, part2_col, True)
 

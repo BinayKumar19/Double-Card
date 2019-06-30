@@ -9,6 +9,29 @@ from enum import Enum
 from utilities import position_translation, GameError, PreferenceType
 import datetime
 
+"""
+==========
+game
+==========
+This module contains a Game class that represent the game and contain board, players and methods to necessary to play 
+the game.
+
+Contents
+--------
+* Game     - Board class that represent the board on which game will be played
+* GameStage - An enumeration to represent the stage of the game i.e. Regular, Recycle or End.
+* add_player() - Add player to the game
+* change_player_turn() - Change player's turn
+* play_regular_move() - Play regular move on the board
+* play_recycle_move() - Play recycle move on the board
+* _set_winner() - Set a winner for the game
+* print_result() - print result of the game
+* display_board() - display the board
+* play_manual_move() - play manual move for the human player
+* play_automatic_move() - play automatic move for the AI
+
+"""
+
 
 class GameStage(Enum):
     REG = 'Regular'
@@ -31,7 +54,7 @@ class Game:
     def add_player(self, player):
         self.players.append(player)
 
-    def change_turn(self):
+    def change_player_turn(self):
         if self.current_turn == 0:
             self.current_turn = 1
         else:
@@ -50,11 +73,11 @@ class Game:
 
     def play_regular_move(self, card_rotation, card_part1_row, card_part1_col):
 
-        if self.players[self.current_turn].card_available():
+        if self.players[self.current_turn].is_card_available():
             card_part2_row, card_part2_col = self._card_part2_position(card_rotation, card_part1_row,
                                                                        card_part1_col)
-            status, error_code = self.board.is_new_move_valid(card_part1_row, card_part1_col,
-                                                              card_part2_row, card_part2_col)
+            status, error_code = self.board.is_regular_move_valid(card_part1_row, card_part1_col,
+                                                                  card_part2_row, card_part2_col)
             if status:
                 card = self.players[self.current_turn].get_card()
                 card.rotate_card(card_rotation)
@@ -184,7 +207,7 @@ class Game:
 
         # find an optimal move
         start_time = datetime.datetime.now()
-        move = self.players[self.current_turn].find_optimal_move(self.board)
+        move = self.players[self.current_turn].find_AI_optimal_move(self.board)
         end_time = datetime.datetime.now()
         time_taken = end_time - start_time
 

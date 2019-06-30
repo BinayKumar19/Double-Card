@@ -8,6 +8,19 @@ from player import Player
 from game import Game, GameStage
 from utilities import FileWriter, GameError, PlayerType, PreferenceType
 
+"""
+==========
+playGame
+==========
+This module contains methods to initialize and play the game.
+
+Contents
+--------
+* initialize_game() - A function to initialize the game.
+* play_game() - A function which calls the required methods in game class to play the game.
+
+"""
+
 
 def play_game(new_game):
     print('Initial Stage of the board')
@@ -31,7 +44,7 @@ def play_game(new_game):
                 return
             elif new_game.stage == GameStage.REC:
                 print(GameError.ORMAN.value)
-            new_game.change_turn()
+            new_game.change_player_turn()
         else:
             print(error_code.value)
 
@@ -84,8 +97,9 @@ def initialize_game():
     return game
 
 
-new_game = initialize_game()
-if new_game != 'N':
-    play_game(new_game)
-else:
-    print('Invalid Input')
+if __name__ == '__main__':
+    new_game = initialize_game()
+    if new_game != 'N':
+        play_game(new_game)
+    else:
+        print('Invalid Input')
